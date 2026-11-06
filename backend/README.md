@@ -15,12 +15,27 @@ Backend de l'application Yoga App !.
     -> Docker Compose
     -> Maven 3.9.3 (https://archive.apache.org/dist/maven/maven-3/3.9.3/binaries/) ou plus
 
+### Utiliser les versions du sujet avec mise
+
+Avec `mise` installé, exécuter depuis `backend/` :
+
+```bash
+mise install java@21 maven@3.9.3
+mise exec java@21 maven@3.9.3 -- mvn -version
+mise exec java@21 maven@3.9.3 -- mvn -B clean verify
+```
+
+Ces commandes utilisent Java 21 et Maven 3.9.3 sans changer le Java du système.
+Le backend ne contient pas encore de tests automatisés : `verify` contrôle
+actuellement la compilation et la génération du JAR, sans démontrer l’absence
+de régression fonctionnelle.
+
 ## Démarrage du back
 Pour démarrer le back, il :
 - démarrer Docker-Desktop sur votre poste de travail local.
-- lancer une console, se placer à la racine du projet et exécuter la commande Maven :
+- lancer une console, se placer dans `backend/` et exécuter la commande Maven avec `mise` :
 ```
-mvn spring-boot:run
+mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
 ```
 Cette commande va :
 - initialiser le container Docker qui contient la base de données
