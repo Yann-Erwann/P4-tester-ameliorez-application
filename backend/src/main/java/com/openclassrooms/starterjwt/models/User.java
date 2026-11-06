@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -36,7 +35,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = {"id"})
 @Builder
 @NoArgsConstructor
-@RequiredArgsConstructor
 @AllArgsConstructor
 @ToString
 public class User {
@@ -65,7 +63,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @NonNull
     private boolean admin;
 
     @CreatedDate
@@ -76,4 +73,12 @@ public class User {
     @Column(columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
+    public User(@NonNull String email, @NonNull String lastName, @NonNull String firstName,
+                @NonNull String password, boolean admin) {
+        this.email = email;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.password = password;
+        this.admin = admin;
+    }
 }
