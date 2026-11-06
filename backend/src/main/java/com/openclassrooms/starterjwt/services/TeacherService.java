@@ -5,6 +5,7 @@ import com.openclassrooms.starterjwt.repository.TeacherRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TeacherService {
@@ -19,6 +20,6 @@ public class TeacherService {
     }
 
     public Teacher findById(Long id) {
-        return this.teacherRepository.findById(id).orElse(null);
+        return this.teacherRepository.findById(Objects.requireNonNull(id)).orElse(null);
     }
 }

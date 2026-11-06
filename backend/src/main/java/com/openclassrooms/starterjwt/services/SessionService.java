@@ -9,6 +9,7 @@ import com.openclassrooms.starterjwt.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,11 +24,11 @@ public class SessionService {
     }
 
     public Session create(Session session) {
-        return this.sessionRepository.save(session);
+        return this.sessionRepository.save(Objects.requireNonNull(session));
     }
 
     public void delete(Long id) {
-        this.sessionRepository.deleteById(id);
+        this.sessionRepository.deleteById(Objects.requireNonNull(id));
     }
 
     public List<Session> findAll() {
@@ -35,7 +36,7 @@ public class SessionService {
     }
 
     public Session getById(Long id) {
-        return this.sessionRepository.findById(id).orElse(null);
+        return this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
     }
 
     public Session update(Long id, Session session) {
@@ -44,8 +45,8 @@ public class SessionService {
     }
 
     public void participate(Long id, Long userId) {
-        Session session = this.sessionRepository.findById(id).orElse(null);
-        User user = this.userRepository.findById(userId).orElse(null);
+        Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
+        User user = this.userRepository.findById(Objects.requireNonNull(userId)).orElse(null);
         if (session == null || user == null) {
             throw new NotFoundException();
         }
@@ -61,7 +62,7 @@ public class SessionService {
     }
 
     public void noLongerParticipate(Long id, Long userId) {
-        Session session = this.sessionRepository.findById(id).orElse(null);
+        Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
         if (session == null) {
             throw new NotFoundException();
         }
