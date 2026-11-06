@@ -41,6 +41,61 @@ Cette commande va :
 - initialiser le container Docker qui contient la base de données
 - lancer l'application back et le connecter à la base de données précédemment créée
 
+### Si les ports habituels sont occupés
+
+Conserver les autres applications et volumes existants. Depuis la racine du
+dépôt, démarrer uniquement le MySQL de ce starter et relever son port hôte :
+
+```bash
+docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml config --quiet
+docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml up -d mysql
+docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml port mysql 3306
+```
+
+L’accès au socket peut nécessiter les droits Docker de votre environnement.
+Ne pas modifier ses permissions pour contourner un refus. Conserver le projet
+Compose `backend`, le conteneur `back_mysql` et le volume `backend_db_data`.
+
+Depuis `backend/`, lancer Spring sur un port libre, ici 8082. Dans cet exemple,
+remplacer **32768** par le port MySQL relevé, attribué dynamiquement :
+
+```bash
+mise exec java@21 maven@3.9.3 -- mvn -B spring-boot:run -Dspring-boot.run.arguments='--server.port=8082 --spring.docker.compose.enabled=false --spring.datasource.url=jdbc:mysql://127.0.0.1:32768/test'
+```
+
+L’intégration Compose de Spring est désactivée pour cette exécution parce que
+MySQL a déjà été lancé séparément. Les identifiants restent chargés depuis
+`backend/.env`. Examiner la cible avant de démarrer : la configuration Hibernate
+du starter utilise `ddl-auto: update`.
+
+Pour le frontend, le proxy doit viser le port choisi pour Spring. Sans modifier
+la configuration du starter, créer un fichier temporaire hors du dépôt, par
+exemple `/tmp/yoga-proxy.json`, contenant :
+
+```json
+{
+  "/api": {
+    "target": "http://127.0.0.1:8082",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
+```
+
+Depuis `frontend/`, avec les dépendances installées, lancer Angular sur un
+autre port libre :
+
+```bash
+npm start -- --host 127.0.0.1 --port 4202 --proxy-config /tmp/yoga-proxy.json
+```
+
+Consulter ensuite `http://127.0.0.1:4202`. Une compilation réussie ne suffit
+pas : vérifier les requêtes du proxy et les parcours avec la base réelle.
+Ne pas supprimer de volume pour résoudre un échec de démarrage.
+
+### Exemple de traces de démarrage
+
 Les traces logs devraient ressemblées à ceci :
 ```
   .   ____          _            __ _ _
