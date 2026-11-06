@@ -59,3 +59,15 @@ Jest utilise `jest.config.js` et l’environnement Angular initialisé dans
 `setup-jest.ts`. Les composants standalone sont importés dans les tests ; les
 requêtes sont simulées par les outils HTTP de test Angular. Ces tests ne
 nécessitent pas le backend ou MySQL et ne remplacent pas les parcours réels.
+
+Lancer l’analyse TypeScript et des templates avec :
+
+```bash
+npm run lint
+```
+
+La cible `lint` d’`angular.json` utilise `eslint.config.cjs`, au format ESLint 9.
+Les contrôles concernent `src/**/*.ts`, y compris les tests et templates
+intégrés, ainsi que `src/**/*.html`. Un code de sortie non nul doit être traité
+comme un diagnostic à examiner ; les règles existantes restent actives pendant
+la remise en état de l’outillage.
