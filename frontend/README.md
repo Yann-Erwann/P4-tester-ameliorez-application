@@ -46,3 +46,16 @@ Launching test:
 for following change:
 
 > npm run test:watch
+
+### Vérifications avant les améliorations
+
+Depuis `frontend/`, exécuter les tests unitaires sans surveillance :
+
+```bash
+npm test -- --ci --runInBand
+```
+
+Jest utilise `jest.config.js` et l’environnement Angular initialisé dans
+`setup-jest.ts`. Les composants standalone sont importés dans les tests ; les
+requêtes sont simulées par les outils HTTP de test Angular. Ces tests ne
+nécessitent pas le backend ou MySQL et ne remplacent pas les parcours réels.

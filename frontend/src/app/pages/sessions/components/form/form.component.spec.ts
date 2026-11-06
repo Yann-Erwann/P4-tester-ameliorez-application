@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {  ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,7 @@ import { FormComponent } from './form.component';
 describe('FormComponent', () => {
   let component: FormComponent;
   let fixture: ComponentFixture<FormComponent>;
+  let http: HttpTestingController;
 
   const mockSessionService = {
     sessionInformation: {
@@ -27,10 +28,10 @@ describe('FormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-
       imports: [
+        FormComponent,
         RouterTestingModule,
-        HttpClientModule,
+        HttpClientTestingModule,
         MatCardModule,
         MatIconModule,
         MatFormFieldModule,
@@ -44,16 +45,21 @@ describe('FormComponent', () => {
         { provide: SessionService, useValue: mockSessionService },
         SessionApiService
       ],
-      declarations: [FormComponent]
     })
       .compileComponents();
 
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
+    http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    http.expectOne('api/teacher').flush([]);
     fixture.detectChanges();
   });
 
+  afterEach(() => http.verify());
+
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(component.sessionForm?.invalid).toBe(true);
   });
 });

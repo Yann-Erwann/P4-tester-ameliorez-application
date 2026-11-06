@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -11,12 +11,10 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        AppComponent,
         RouterTestingModule,
-        HttpClientModule,
+        HttpClientTestingModule,
         MatToolbarModule
-      ],
-      declarations: [
-        AppComponent
       ],
     }).compileComponents();
   });

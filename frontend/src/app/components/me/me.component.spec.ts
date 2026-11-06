@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,6 +12,7 @@ import { MeComponent } from './me.component';
 describe('MeComponent', () => {
   let component: MeComponent;
   let fixture: ComponentFixture<MeComponent>;
+  let http: HttpTestingController;
 
   const mockSessionService = {
     sessionInformation: {
@@ -21,10 +22,10 @@ describe('MeComponent', () => {
   }
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MeComponent],
       imports: [
+        MeComponent,
         MatSnackBarModule,
-        HttpClientModule,
+        HttpClientTestingModule,
         MatCardModule,
         MatFormFieldModule,
         MatIconModule,
@@ -36,10 +37,23 @@ describe('MeComponent', () => {
 
     fixture = TestBed.createComponent(MeComponent);
     component = fixture.componentInstance;
+    http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    http.expectOne('api/user/1').flush({
+      id: 1,
+      email: 'audit@example.invalid',
+      firstName: 'Audit',
+      lastName: 'Yoga',
+      admin: true,
+      createdAt: '2026-11-01T00:00:00',
+    });
     fixture.detectChanges();
   });
 
+  afterEach(() => http.verify());
+
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Audit YOGA');
   });
 });

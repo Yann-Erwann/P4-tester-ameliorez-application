@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -16,11 +16,11 @@ describe('RegisterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RegisterComponent],
       imports: [
+        RegisterComponent,
         BrowserAnimationsModule,
-        HttpClientModule,
-        ReactiveFormsModule,  
+        HttpClientTestingModule,
+        ReactiveFormsModule,
         MatCardModule,
         MatFormFieldModule,
         MatIconModule,
