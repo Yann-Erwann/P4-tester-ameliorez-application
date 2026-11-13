@@ -8,17 +8,23 @@ import { AppComponent } from './app.component';
 import { SessionService } from './core/service/session.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ɵMatchMedia, ɵMockMatchMedia } from '@angular/flex-layout/core';
 
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [ɵMockMatchMedia],
       imports: [
         AppComponent,
         RouterTestingModule,
         HttpClientTestingModule,
         MatToolbarModule
       ],
+    }).overrideProvider(ɵMatchMedia, {
+      useFactory: (media: ɵMockMatchMedia): ɵMockMatchMedia => media,
+      deps: [ɵMockMatchMedia],
     }).compileComponents();
   });
 
@@ -60,5 +66,63 @@ describe('AppComponent', () => {
     fixture.detectChanges();
     fixture.destroy();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks only the current guest page as active and updates it on navigation', async () => {
+    const router = TestBed.inject(Router);
+    router.resetConfig([
+      { path: 'login', component: NotFoundComponent },
+      { path: 'register', component: NotFoundComponent },
+    ]);
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await router.navigateByUrl('/login');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const login = element.querySelector<HTMLAnchorElement>('[routerLink="/login"]')!;
+    const register = element.querySelector<HTMLAnchorElement>('[routerLink="/register"]')!;
+    expect(login.classList.contains('active')).toBe(true);
+    expect(login.getAttribute('aria-current')).toBe('page');
+    expect(register.classList.contains('active')).toBe(false);
+    expect(register.hasAttribute('aria-current')).toBe(false);
+
+    register.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(router.url).toBe('/register');
+    expect(register.classList.contains('active')).toBe(true);
+    expect(register.getAttribute('aria-current')).toBe('page');
+    expect(login.classList.contains('active')).toBe(false);
+    expect(login.hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('marks Sessions active on a nested session route and switches to Account', async () => {
+    const router = TestBed.inject(Router);
+    router.resetConfig([
+      { path: 'sessions/detail/:id', component: NotFoundComponent },
+      { path: 'me', component: NotFoundComponent },
+    ]);
+    TestBed.inject(SessionService).logIn({ id: 1, admin: false, token: 'test', type: 'Bearer', username: 'test@example.invalid', firstName: 'Test', lastName: 'Yoga' });
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await router.navigateByUrl('/sessions/detail/1');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const sessions = element.querySelector<HTMLElement>('[routerLink="sessions"]')!;
+    const account = element.querySelector<HTMLElement>('[routerLink="me"]')!;
+    expect(sessions.classList.contains('active')).toBe(true);
+    expect(sessions.getAttribute('aria-current')).toBe('page');
+    expect(account.classList.contains('active')).toBe(false);
+
+    account.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(router.url).toBe('/me');
+    expect(account.classList.contains('active')).toBe(true);
+    expect(account.getAttribute('aria-current')).toBe('page');
+    expect(sessions.classList.contains('active')).toBe(false);
+    expect(sessions.hasAttribute('aria-current')).toBe(false);
   });
 });
