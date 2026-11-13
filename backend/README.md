@@ -36,6 +36,26 @@ Les résultats JUnit sont dans `target/surefire-reports/`. H2 ne remplace pas
 une validation avec MySQL : vérifier séparément les contraintes SQL et les
 parcours contre le serveur réel.
 
+## Responsabilités et erreurs HTTP
+
+Les contrôleurs délèguent les opérations métier aux services. `AuthService`
+assure la connexion et l’inscription, les services vérifient l’existence des
+ressources avant lecture ou suppression et la propriété du compte avant sa
+suppression. `ArchitectureTest` interdit toute dépendance des contrôleurs vers
+les repositories.
+
+`ApiExceptionHandler` traite les identifiants non numériques et les opérations
+de participation invalides en 400, les ressources absentes en 404 et le refus
+de suppression du compte d’un autre utilisateur en 401, conformément au contrat
+existant. Ces réponses ont un corps vide. Les messages JSON d’inscription et
+la réponse de connexion sont conservés. Les opérations cohérentes de suppression
+et de participation sont transactionnelles.
+
+Ces contrôles ne constituent pas un audit complet des autorisations. Les règles
+d’accès aux modifications de séances, l’inscription d’un autre utilisateur,
+les contraintes SQL et la suppression d’un compte encore inscrit nécessitent
+une vérification distincte.
+
 ## Démarrage du back
 Pour démarrer le back, il :
 - démarrer Docker-Desktop sur votre poste de travail local.
