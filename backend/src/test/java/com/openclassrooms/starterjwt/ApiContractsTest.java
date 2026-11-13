@@ -392,6 +392,13 @@ class ApiContractsTest {
     }
 
     @Test
+    void creatingAnotherSessionForTheSameTeacherReturnsEmpty409() throws Exception {
+        mvc.perform(authenticated(post("/api/session"), admin).contentType(MediaType.APPLICATION_JSON)
+                        .content(sessionBody("Conflicting teacher")))
+                .andExpect(status().isConflict()).andExpect(content().string(""));
+    }
+
+    @Test
     void missingTeacherAndParticipantReferencesReturn404WithoutWrites() throws Exception {
         var body = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(sessionBody("Missing relation"));
         body.put("teacher_id", 999999999);

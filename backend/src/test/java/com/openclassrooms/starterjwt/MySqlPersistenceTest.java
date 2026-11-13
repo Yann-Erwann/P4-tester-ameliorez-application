@@ -98,6 +98,18 @@ class MySqlPersistenceTest {
     }
 
     @Test
+    void aTeacherCannotBeAssignedToTwoSessions() {
+        Session original = newSession(List.of());
+        assertThatThrownBy(() -> jdbc.update(
+                "INSERT INTO sessions(name,date,description,teacher_id) VALUES (?,CURRENT_TIMESTAMP,?,?)",
+                "Conflicting validation", "Must not be persisted", original.getTeacher().getId()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM sessions WHERE teacher_id = ?", Long.class,
+                original.getTeacher().getId())).isEqualTo(1L);
+        assertThat(sessions.findById(original.getId())).isPresent();
+    }
+
+    @Test
     void duplicateEmailsRemainRejectedByMySql() {
         User original = newMember();
         users.flush();

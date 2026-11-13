@@ -51,8 +51,9 @@ en fin de test ; aucune table ni volume n’est recréé. Les compteurs automati
 peuvent avancer malgré le rollback. Sans cette variable, ces tests MySQL sont
 explicitement ignorés, tandis que les tests H2 restent exécutés. Ces tests
 vérifient suppression d’un compte inscrit, maintien des participants à l’édition,
-clés étrangères et unicité des adresses. Les essais HTTP sur serveur et les
-parcours navigateur sont des vérifications complémentaires.
+clés étrangères, unicité des adresses et unicité de la séance par enseignant.
+Les essais HTTP sur serveur et les parcours navigateur sont des vérifications
+complémentaires.
 
 ## Responsabilités et erreurs HTTP
 
@@ -93,6 +94,14 @@ l’URL corresponde à celui de l’identité authentifiée, y compris pour un a
 Un appel anonyme reçoit 401 ; une opération interdite à un utilisateur connecté
 reçoit 403 avec un corps vide. Le refus de suppression du compte d’un tiers
 conserve son contrat historique 401.
+
+### Une seule séance par enseignant
+
+Un enseignant peut être affecté à une seule séance. Le mapping `@OneToOne` et
+l’index unique sur `sessions.teacher_id` sont conservés. Créer une seconde séance
+pour le même enseignant, ou lui réaffecter une autre séance, produit un conflit
+409 avec un corps vide. Modifier la séance actuelle en conservant son enseignant
+reste possible. Aucun changement de schéma ou de données n’est nécessaire.
 
 ### Journalisation
 
