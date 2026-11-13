@@ -107,8 +107,10 @@ mise exec java@21 maven@3.9.3 -- mvn -B verify
 
 Après suppression ou déplacement de classes, employer `clean verify` pour écarter
 les anciennes classes. Les tests backend exercent les contrats HTTP avec Spring
-Security et une base H2 isolée, les JWT et les mappers. JaCoCo impose 90 % des
-lignes par package. Une réussite ne valide pas les contraintes propres à MySQL
+Security et une base H2 isolée, les JWT, les mappers et les services avec Mockito.
+JaCoCo impose 90 % des lignes et 80 % des instructions, branches, complexité,
+méthodes et classes par package, hors DTO et code généré Lombok. Une réussite
+ne valide pas les contraintes propres à MySQL
 ni tous les parcours utilisateur ; vérifier ces éléments séparément.
 
 `ARCH-001` impose controller → service → repository. `ArchitectureTest` utilise
@@ -121,6 +123,14 @@ de test. Les scripts déclarés comprennent `start`, `test`, `lint` et les cible
 Cypress ; aucun script npm `build` n’est actuellement déclaré. Vérifier qu’un
 script dispose bien du builder et des dépendances nécessaires avant de l’annoncer
 fonctionnel. Les tests unitaires sont configurés avec Jest.
+
+La partie 2 utilise `npm run test:coverage` pour Jest et `npm run e2e:serve`
+puis `npm run e2e:ci` pour Cypress. Chaque couverture est contrôlée séparément
+à 80 % pour instructions, branches, fonctions et lignes. Les README précisent
+le périmètre, les rapports et le comptage des intégrations ; chaque suite
+Jest/backend doit atteindre au moins 30 % de cas d’intégration exécutés.
+Les tests Cypress avec interception HTTP sont distingués du contrôle réel
+Spring/MySQL. Ne pas additionner les couvertures Jest et E2E pour valider un seuil.
 
 Si le frontend reste protégé, exécuter les contrôles qui produisent des fichiers
 dans une copie isolée, sans installer de dépendances ni générer d’artefacts dans
