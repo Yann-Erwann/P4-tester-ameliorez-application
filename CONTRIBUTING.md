@@ -111,10 +111,10 @@ Security et une base H2 isolée, les JWT et les mappers. JaCoCo impose 90 % des
 lignes par package. Une réussite ne valide pas les contraintes propres à MySQL
 ni tous les parcours utilisateur ; vérifier ces éléments séparément.
 
-`ARCH-001` impose controller → service → repository. Vérifier si un test
-l’automatise avant d’annoncer sa couverture ; aucun `ArchitectureTests` n’est
-actuellement fourni dans ce starter. Ne pas désactiver un contrôle existant
-pour accepter une dépendance non conforme.
+`ARCH-001` impose controller → service → repository. `ArchitectureTest` utilise
+ArchUnit pour interdire aux contrôleurs de dépendre des repositories. Il est
+exécuté par `verify`. Ce contrôle ne prouve pas que toutes les règles métier
+sont placées dans les services ; compléter par une lecture du diff.
 
 Pour Angular, lire `frontend/package.json`, `angular.json` et les configurations
 de test. Les scripts déclarés comprennent `start`, `test`, `lint` et les cibles
