@@ -10,6 +10,7 @@ import com.openclassrooms.starterjwt.services.SessionService;
 import com.openclassrooms.starterjwt.services.UserService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Tag("integration")
 @SpringBootTest(properties = {
         "spring.docker.compose.enabled=false",
         "spring.datasource.url=${YOGA_MYSQL_TEST_URL}",
