@@ -11,7 +11,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { Session } from '../../../../core/models/session.interface';
 import { SessionApiService } from '../../../../core/service/session-api.service';
 
-describe('ListComponent', () => {
+describe('[integration] J-I02 ListComponent', () => {
   let component: ListComponent;
   let fixture: ComponentFixture<ListComponent>;
   let http: HttpTestingController;

@@ -10,7 +10,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { DetailComponent } from './pages/sessions/components/detail/detail.component';
 import { FormComponent } from './pages/sessions/components/form/form.component';
 
-describe('Component request lifetime', () => {
+describe('[unit] J-U02 Component request lifetime', () => {
   let http: HttpTestingController;
   const navigate = jest.fn().mockResolvedValue(true);
   const open = jest.fn();

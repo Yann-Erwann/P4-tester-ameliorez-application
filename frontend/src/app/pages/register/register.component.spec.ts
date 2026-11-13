@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 
 import { RegisterComponent } from './register.component';
 
-describe('RegisterComponent', () => {
+describe('[integration] J-I02 RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let http: HttpTestingController;

@@ -4,7 +4,7 @@ import { expect } from '@jest/globals';
 
 import { TeacherService } from './teacher.service';
 
-describe('TeacherService', () => {
+describe('[unit] J-U03 TeacherService', () => {
   let service: TeacherService;
 
   beforeEach(() => {
