@@ -41,9 +41,15 @@ public class SessionService {
         return this.sessionRepository.findById(Objects.requireNonNull(id)).orElseThrow(NotFoundException::new);
     }
 
-    public Session update(Long id, Session session) {
-        session.setId(id);
-        return this.sessionRepository.save(session);
+    @Transactional
+    public Session update(Long id, Session changes) {
+        Session existing = getById(id);
+        existing.setName(changes.getName());
+        existing.setDescription(changes.getDescription());
+        existing.setDate(changes.getDate());
+        existing.setTeacher(changes.getTeacher());
+        // Membership is managed exclusively by the participation operations.
+        return this.sessionRepository.save(existing);
     }
 
     @Transactional

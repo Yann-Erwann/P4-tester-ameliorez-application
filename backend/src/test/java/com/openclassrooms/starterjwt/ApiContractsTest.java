@@ -49,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class ApiContractsTest {
+    @Autowired jakarta.persistence.EntityManager entityManager;
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired UserRepository users;
@@ -229,6 +230,36 @@ class ApiContractsTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.name").value("Updated yoga"));
         mvc.perform(authenticated(delete("/api/session/{id}", id), admin)).andExpect(status().isOk()).andExpect(content().string(""));
         assertThat(sessions.findById(id)).isEmpty();
+    }
+
+    @Test
+    void updatingSessionDetailsKeepsParticipantsAndCreationDate() throws Exception {
+        session.getUsers().add(owner);
+        sessions.saveAndFlush(session);
+        long id = session.getId();
+        long participantId = owner.getId();
+        entityManager.clear();
+        var createdAt = sessions.findById(id).orElseThrow().getCreatedAt();
+        // The frontend omits users while editing session details.
+        mvc.perform(authenticated(put("/api/session/{id}", id), admin)
+                        .contentType(MediaType.APPLICATION_JSON).content(sessionBody("Updated details")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.users[0]").value(participantId))
+                .andExpect(jsonPath("$.name").value("Updated details"));
+        sessions.flush();
+        entityManager.clear();
+        Session reloaded = sessions.findById(id).orElseThrow();
+        assertThat(reloaded.getUsers()).extracting(User::getId).containsExactly(participantId);
+        assertThat(reloaded.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(reloaded.getName()).isEqualTo("Updated details");
+    }
+
+    @Test
+    void updatingAnAbsentSessionReturns404WithoutCreatingOne() throws Exception {
+        long before = sessions.count();
+        mvc.perform(authenticated(put("/api/session/999999999"), admin)
+                        .contentType(MediaType.APPLICATION_JSON).content(sessionBody("Absent")))
+                .andExpect(status().isNotFound()).andExpect(content().string(""));
+        assertThat(sessions.count()).isEqualTo(before);
     }
 
     @Test

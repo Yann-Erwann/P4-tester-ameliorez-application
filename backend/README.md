@@ -51,6 +51,11 @@ existant. Ces réponses ont un corps vide. Les messages JSON d’inscription et
 la réponse de connexion sont conservés. Les opérations cohérentes de suppression
 et de participation sont transactionnelles.
 
+La modification d’une séance charge d’abord la séance existante et change
+uniquement son nom, sa description, sa date et son enseignant. Elle conserve
+les participants et la date de création, les inscriptions passent par les
+routes de participation. Une séance absente renvoie 404, sans tentative de sauvegarde.
+
 Ces contrôles ne constituent pas un audit complet des autorisations. Les règles
 d’accès aux modifications de séances, l’inscription d’un autre utilisateur,
 les contraintes SQL et la suppression d’un compte encore inscrit nécessitent
