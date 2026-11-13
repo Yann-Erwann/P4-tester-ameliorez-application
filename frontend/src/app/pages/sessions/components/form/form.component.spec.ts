@@ -12,6 +12,13 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { expect } from '@jest/globals';
 import { SessionService } from 'src/app/core/service/session.service';
 import { SessionApiService } from '../../../../core/service/session-api.service';
+import { TeacherService } from '../../../../core/service/teacher.service';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { MatSelect } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject } from 'rxjs';
+import { Teacher } from '../../../../core/models/teacher.interface';
 
 import { FormComponent } from './form.component';
 
@@ -43,6 +50,7 @@ describe('FormComponent', () => {
       ],
       providers: [
         { provide: SessionService, useValue: mockSessionService },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } },
         SessionApiService
       ],
     })
@@ -61,5 +69,81 @@ describe('FormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
     expect(component.sessionForm?.invalid).toBe(true);
+  });
+
+  it('shows the create title and saves the form values', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const notify = jest.spyOn(fixture.debugElement.injector.get(MatSnackBar), 'open').mockImplementation();
+    expect(element.textContent).toContain('Create session');
+    expect(element.textContent).not.toContain('Update session');
+    const values = { name: 'Practice', date: '2026-12-01', teacher_id: 7, description: 'Yoga practice' };
+    component.sessionForm!.setValue(values);
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
+    element.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const request = http.expectOne('api/session');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(values);
+    request.flush({ ...values, id: 1, users: [] });
+    expect(navigate).toHaveBeenCalledWith(['sessions']);
+    expect(notify).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 });
+  });
+
+  it('shows the update title, waits for the form and saves changes', () => {
+    jest.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/sessions/update/1');
+    const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    jest.spyOn(fixture.debugElement.injector.get(MatSnackBar), 'open').mockImplementation();
+    component.sessionForm = undefined;
+    component.ngOnInit();
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.textContent).toContain('Update session');
+    expect(element.textContent).not.toContain('Create session');
+    expect(element.querySelector('form')).toBeNull();
+    http.expectOne('api/session/1').flush({ id: 1, name: 'Yoga', date: '2026-12-01', teacher_id: 7, description: 'Practice', users: [1] });
+    fixture.detectChanges();
+    // Recreating the async block subscribes to the teacher request again.
+    http.expectOne('api/teacher').flush([]);
+    fixture.detectChanges();
+    expect(element.querySelector('form')).not.toBeNull();
+    component.sessionForm!.patchValue({ name: 'Updated yoga' });
+    element.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const request = http.expectOne('api/session/1');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body.name).toBe('Updated yoga');
+    expect(request.request.body.users).toBeUndefined();
+    request.flush({ id: 1, ...request.request.body });
+    expect(navigate).toHaveBeenCalledWith(['sessions']);
+  });
+
+  it('keeps teacher options attached to their IDs through refresh, reorder and removal', () => {
+    const first: Teacher = { id: 7, firstName: 'First', lastName: 'Teacher', createdAt: new Date(), updatedAt: new Date() };
+    const second = { ...first, id: 8, firstName: 'Second' };
+    const teachers = new BehaviorSubject([first, second]);
+    component.teachers$ = teachers.asObservable();
+    fixture.detectChanges();
+    const select = fixture.debugElement.query(By.directive(MatSelect)).componentInstance as MatSelect;
+    const options = select.options.toArray();
+    expect(options.map(option => option.value)).toEqual([7, 8]);
+    teachers.next([{ ...second, firstName: 'Updated' }, { ...first }]);
+    fixture.detectChanges();
+    expect(select.options.first).toBe(options[1]);
+    expect(select.options.last).toBe(options[0]);
+    expect(select.options.first.viewValue).toContain('Updated');
+    teachers.next([{ ...first }]);
+    fixture.detectChanges();
+    expect(select.options.toArray()).toEqual([options[0]]);
+    teachers.next([]);
+    fixture.detectChanges();
+    expect(select.options.length).toBe(0);
+  });
+
+  it('cancels the async teacher request when leaving the form', () => {
+    component.teachers$ = TestBed.inject(TeacherService).all();
+    fixture.detectChanges();
+    const request = http.expectOne('api/teacher');
+    fixture.destroy();
+    expect(request.cancelled).toBe(true);
   });
 });

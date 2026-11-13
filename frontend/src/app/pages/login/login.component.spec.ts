@@ -43,6 +43,7 @@ describe('LoginComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.error')).toBeNull();
   });
 
   it('should open the sessions after a successful login', () => {

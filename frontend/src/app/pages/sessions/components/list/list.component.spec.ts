@@ -7,6 +7,9 @@ import { expect } from '@jest/globals';
 import { SessionService } from 'src/app/core/service/session.service';
 
 import { ListComponent } from './list.component';
+import { BehaviorSubject, of } from 'rxjs';
+import { Session } from '../../../../core/models/session.interface';
+import { SessionApiService } from '../../../../core/service/session-api.service';
 
 describe('ListComponent', () => {
   let component: ListComponent;
@@ -20,6 +23,7 @@ describe('ListComponent', () => {
   }
 
   beforeEach(async () => {
+    mockSessionService.sessionInformation.admin = true;
     await TestBed.configureTestingModule({
       imports: [
         ListComponent,
@@ -54,5 +58,50 @@ describe('ListComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Baseline yoga');
+  });
+
+  it('shows create and edit only to administrators while keeping detail available', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[routerLink="create"]')).not.toBeNull();
+    expect(element.textContent).toContain('Edit');
+    mockSessionService.sessionInformation.admin = false;
+    fixture.detectChanges();
+    expect(element.querySelector('[routerLink="create"]')).toBeNull();
+    expect(element.textContent).not.toContain('Edit');
+    expect(element.textContent).toContain('Detail');
+  });
+
+  it('renders an empty list', () => {
+    component.sessions$ = of([]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.item')).toHaveLength(0);
+  });
+
+  it('keeps cards attached to their IDs when sessions are refreshed, reordered and removed', () => {
+    const first: Session = { id: 1, name: 'First', description: 'Practice', date: new Date('2026-12-01'), teacher_id: 7, users: [] };
+    const second = { ...first, id: 2, name: 'Second' };
+    const sessions = new BehaviorSubject([first, second]);
+    component.sessions$ = sessions.asObservable();
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const cards = element.querySelectorAll('.item');
+    sessions.next([{ ...second, name: 'Updated second' }, { ...first }]);
+    fixture.detectChanges();
+    const reordered = element.querySelectorAll('.item');
+    expect(reordered[0]).toBe(cards[1]);
+    expect(reordered[1]).toBe(cards[0]);
+    expect(reordered[0].textContent).toContain('Updated second');
+    sessions.next([{ ...first }]);
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.item')).toHaveLength(1);
+    expect(element.querySelector('.item')).toBe(cards[0]);
+  });
+
+  it('cancels the async session request when leaving the list', () => {
+    component.sessions$ = TestBed.inject(SessionApiService).all();
+    fixture.detectChanges();
+    const request = http.expectOne('api/session');
+    fixture.destroy();
+    expect(request.cancelled).toBe(true);
   });
 });

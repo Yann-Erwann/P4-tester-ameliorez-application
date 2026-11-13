@@ -56,4 +56,24 @@ describe('MeComponent', () => {
     expect(component).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Audit YOGA');
   });
+
+  it('hides account information until a user is available', () => {
+    component.user = undefined;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Name:');
+    expect(fixture.nativeElement.querySelector('button[color="warn"]')).toBeNull();
+  });
+
+  it('shows the admin message or the account deletion action according to the user', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.textContent).toContain('You are admin');
+    expect(element.querySelector('button[color="warn"]')).toBeNull();
+    component.user = { ...component.user!, admin: false };
+    fixture.detectChanges();
+    expect(element.textContent).not.toContain('You are admin');
+    expect(element.textContent).toContain('Delete my account:');
+    const remove = jest.spyOn(component, 'delete').mockImplementation(() => {});
+    element.querySelector<HTMLButtonElement>('button[color="warn"]')!.click();
+    expect(remove).toHaveBeenCalledTimes(1);
+  });
 });
