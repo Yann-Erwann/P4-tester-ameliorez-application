@@ -47,11 +47,9 @@ public class SessionController {
 
     @PostMapping()
     public ResponseEntity<?> create(@Valid @RequestBody SessionDto sessionDto) {
-        log.info(sessionDto);
-
         Session session = this.sessionService.create(this.sessionMapper.toEntity(sessionDto));
 
-        log.info(session);
+        log.info("Created session {}", session.getId());
         return ResponseEntity.ok().body(this.sessionMapper.toDto(session));
     }
 
