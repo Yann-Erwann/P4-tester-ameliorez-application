@@ -27,8 +27,8 @@ public abstract class SessionMapper implements EntityMapper<SessionDto, Session>
 
     @Mappings({
             @Mapping(source = "description", target = "description"),
-            @Mapping(target = "teacher", expression = "java(sessionDto.getTeacher_id() != null ? this.teacherService.findById(sessionDto.getTeacher_id()) : null)"),
-            @Mapping(target = "users", expression = "java(Optional.ofNullable(sessionDto.getUsers()).orElseGet(Collections::emptyList).stream().map(user_id -> { User user = this.userService.findById(user_id); if (user != null) { return user; } return null; }).collect(Collectors.toList()))"),
+            @Mapping(target = "teacher", expression = "java(sessionDto.getTeacher_id() != null ? this.teacherService.getRequiredById(sessionDto.getTeacher_id()) : null)"),
+            @Mapping(target = "users", expression = "java(Optional.ofNullable(sessionDto.getUsers()).orElseGet(Collections::emptyList).stream().map(user_id -> { return this.userService.getRequiredById(user_id); }).collect(Collectors.toList()))"),
     })
     public abstract Session toEntity(SessionDto sessionDto);
 
