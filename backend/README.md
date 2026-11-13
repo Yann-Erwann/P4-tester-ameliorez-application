@@ -117,6 +117,29 @@ séances, puis supprime le compte dans la même transaction. Les séances,
 enseignants et inscriptions des autres membres sont conservés. Aucun effacement
 en cascade des séances n’est configuré, les clés étrangères restent actives.
 
+## Validation locale du 13 novembre 2026
+
+| Contrôle | Résultat |
+| --- | --- |
+| `clean verify` avec Java 21 / Maven 3.9.3 via mise et URL MySQL | 48 tests réussis, dont cinq sur MySQL, aucun test ignoré. |
+| JaCoCo | Seuil existant de 90 % des lignes par package respecté. |
+| Contrats HTTP contre le JAR et MySQL | 49 contrôles réussis : autorisations, statuts, édition, inscriptions et suppression de compte inscrit. |
+| Parcours Chromium contre Angular / Spring / MySQL | 13 contrôles réussis, données temporaires retirées et lignes initiales identiques. |
+| Frontend conservé, vérifié dans une copie isolée | 48 tests / 14 suites, lint et builds de développement et production réussis. |
+
+Le build de production émet l’avertissement de budget initial : 843,19 kB pour
+un seuil d’avertissement de 500 kB, le plafond bloquant de 1 MB est respecté.
+L’optimisation des polices nécessite l’accès réseau à Google Fonts.
+
+Le frontend reste inchangé à la demande de l’utilisateur. Ses validations de
+longueur et son champ de mot de passe d’inscription restent ceux du starter.
+Login/Register affichent une erreur générique, le formulaire de séance ne
+présente pas de message dédié pour un refus 409. Ces limites ont été vérifiées
+dans Chromium, les statuts et les contrôles côté serveur sont opérationnels.
+La validation locale du backend est acquise. La validation complète de
+l’expérience utilisateur conserve ces réserves. Aucun push, merge ou déploiement
+n’est inclus dans cette validation.
+
 ## Démarrage du back
 Pour démarrer le back, il :
 - démarrer Docker-Desktop sur votre poste de travail local.
