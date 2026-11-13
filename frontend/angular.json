@@ -73,7 +73,9 @@
               "vendorChunk": true,
               "customWebpackConfig": {
                 "path": "./cypress/coverage.webpack.ts"
-              }
+              },
+              "optimization": false,
+              "buildOptimizer": false
             }
           },
           "defaultConfiguration": "production"

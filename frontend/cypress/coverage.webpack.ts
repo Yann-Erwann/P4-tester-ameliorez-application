@@ -8,7 +8,7 @@ export default {
         loader: '@jsdevtools/coverage-istanbul-loader',
         options: { esModules: true },
         enforce: 'post',
-        include: path.join(__dirname, '..', 'src'),
+        include: path.join(__dirname, '..', 'src', 'app'),
         exclude: [
           /\.(e2e|spec)\.ts$/,
           /node_modules/,

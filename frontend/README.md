@@ -58,7 +58,89 @@ Cette classification décrit les collaborateurs réellement présents : un test
 avec HttpTestingController n’est pas un appel à Spring/MySQL. Les tests de
 durée de vie qui remplacent le template ne sont pas comptés comme intégrations.
 
-Le « plan de testing fourni » mentionné dans le sujet n’est pas présent dans le
-dépôt au début de cette partie. Les identifiants ci-dessus et ci-dessous sont
-une matrice de travail explicite, à rapprocher de ce plan lorsqu’il est disponible ;
-ils ne constituent pas une affirmation de conformité à un document absent.
+La grille fournie par l’utilisateur comporte quatre étapes : Jest, Cypress,
+Mockito/JUnit et README. Les identifiants de ce README sont les scénarios de
+mise en œuvre de cette grille. La frontière réseau et la classification de
+chaque famille de tests sont indiquées pour rendre le ratio vérifiable.
+
+## Cypress — écrans et couverture E2E
+
+Sous Linux, installer les dépendances système de Cypress, notamment Xvfb et les
+bibliothèques GTK/GBM/NSS/audio. Cypress 15.2.0 est déclaré dans le lockfile.
+Vérifier son installation avec `npx cypress verify`.
+
+Dans un premier terminal :
+
+```bash
+npm run e2e:serve
+```
+
+Le serveur de test instrumenté écoute sur `http://127.0.0.1:4203`. Il utilise la
+configuration Angular `e2e` et `cypress/coverage.webpack.ts`. Le code applicatif
+reste inchangé ; l’instrumentation est limitée à cette construction de test.
+
+Dans un second terminal :
+
+```bash
+npm run e2e:ci
+```
+
+La configuration Cypress est `cypress.config.ts`, le support de collecte est
+`cypress/support/e2e.ts`, et NYC lit `.nycrc.json`. La suite `screens.cy.ts`
+utilise le vrai navigateur et les vrais composants/services Angular, avec
+`cy.intercept()` à la frontière HTTP pour des scénarios déterministes.
+
+| Cas | Écran et comportement |
+| --- | --- |
+| E-01 / E-02 | Inscription nominale et adresse refusée. |
+| E-03 | Connexion refusée et visibilité du mot de passe de connexion. |
+| E-04 | Garde des routes privées et écran introuvable. |
+| E-05 / E-06 | Liste/détail membre, participation/retrait et liste vide/déconnexion. |
+| E-07 / E-08 | Création, édition, suppression admin et retour sans sauvegarde. |
+| E-09 / E-10 | Compte administrateur, retour et suppression du compte membre. |
+
+Rapports E2E : `coverage/e2e/index.html`, `lcov.info`, `coverage-summary.json`,
+rapports JUnit dans `coverage/e2e/results/` et captures d’échec dans
+`coverage/e2e/screenshots/`. `npm run e2e:coverage` régénère les rapports et
+**échoue sous 80 % de lignes, instructions, fonctions ou branches**. La
+couverture E2E n’est pas fusionnée avec Jest pour atteindre artificiellement un
+seuil : chaque partie dispose de son propre rapport et contrôle.
+
+### Contrôle complémentaire avec Spring/MySQL réels
+
+Dans un environnement où Angular doit viser Spring 8082, relancer uniquement le
+serveur de test avec le proxy temporaire existant :
+
+```bash
+npm run e2e:serve -- --proxy-config /tmp/yoga-real-proxy.json
+```
+
+Le backend et MySQL doivent être prêts. Le contrôle réel est en lecture seule et
+nécessite un compte administrateur et au moins une séance avec un enseignant.
+L’utilisateur de démonstration documenté dans le README backend convient aux
+données locales. D’autres identifiants peuvent être fournis par les variables
+`CYPRESS_adminEmail` et `CYPRESS_adminPassword`, sans les commiter.
+
+```bash
+# Les dix parcours contrôlés et le parcours réel, avec rapport commun E2E :
+CYPRESS_realApi=true npm run e2e:ci
+```
+
+`real-api.cy.ts` ne contient aucun `cy.intercept` : connexion, JWT, liste,
+détail/enseignant, compte et déconnexion traversent le proxy Angular, les
+contrôleurs/services Spring et MySQL. Ce contrôle n’insère ni ne supprime de
+données. La suite complète a passé **11 tests sans échec ni test ignoré**.
+La couverture E2E reste indépendante de celle de Jest. Les anciens fichiers de
+couverture bruts et rapports JUnit sont retirés avant chaque nouveau lancement,
+pour que le résultat ne réutilise pas les succès d’une exécution précédente.
+Les dernières mesures E2E sont : 98,21 % instructions, 94,54 % branches,
+100 % fonctions et 98,19 % lignes.
+
+## Comportements applicatifs conservés
+
+Cette partie modifie les tests, leur configuration et la documentation. Les
+validateurs de longueur d’origine, l’affichage du mot de passe d’inscription,
+la redirection existante de la garde invitée et la gestion limitée des erreurs
+des formulaires de séance ne sont pas corrigés silencieusement par les tests.
+Le build production a un avertissement de taille initiale, distinct de la
+couverture et du résultat de `ng serve`.

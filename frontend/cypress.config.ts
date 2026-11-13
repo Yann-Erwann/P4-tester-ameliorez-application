@@ -1,16 +1,24 @@
-import { defineConfig } from 'cypress'
+import { defineConfig } from 'cypress';
+import { rmSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 export default defineConfig({
-  videosFolder: 'cypress/videos',
-  screenshotsFolder: 'cypress/screenshots',
-  fixturesFolder: 'cypress/fixtures',
   video: false,
+  screenshotsFolder: 'coverage/e2e/screenshots',
+  reporter: 'junit',
+  reporterOptions: { mochaFile: 'coverage/e2e/results/results-[hash].xml', toConsole: false },
   e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      return require('./cypress/plugins/index.ts').default(on, config)
+    baseUrl: 'http://127.0.0.1:4203',
+    supportFile: 'cypress/support/e2e.ts',
+    setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): Cypress.PluginConfigOptions {
+      config.specPattern = config.env['realApi'] ? 'cypress/e2e/*.cy.ts' : 'cypress/e2e/screens.cy.ts';
+      // Never combine a new run with old coverage or failed JUnit artifacts.
+      for (const directory of ['coverage/e2e/.nyc_output', 'coverage/e2e/results']) {
+        rmSync(resolve(config.projectRoot, directory), { recursive: true, force: true });
+      }
+      const registerCodeCoverageTasks = require('@cypress/code-coverage/task') as typeof import('@cypress/code-coverage/task').default;
+      registerCodeCoverageTasks(on, config);
+      return config;
     },
-    baseUrl: 'http://localhost:4200',
   },
-})
+});

@@ -7,11 +7,12 @@
     "test:watch": "jest --watch",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "e2e:ci": "ng run yoga:e2e-ci",
-    "e2e:coverage": "npx nyc report --reporter=lcov --reporter=text-summary",
+    "e2e:ci": "cypress run --browser electron && npm run e2e:coverage",
+    "e2e:coverage": "nyc report --check-coverage",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:coverage": "jest --ci --runInBand --json --outputFile=coverage/jest/test-results.json"
+    "test:coverage": "jest --ci --runInBand --json --outputFile=coverage/jest/test-results.json",
+    "e2e:serve": "ng run yoga:serve-coverage --host 127.0.0.1 --port 4203"
   },
   "private": true,
   "dependencies": {
