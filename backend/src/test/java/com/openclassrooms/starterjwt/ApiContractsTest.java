@@ -370,6 +370,41 @@ class ApiContractsTest {
     }
 
     @Test
+    void errorDispatchKeepsTheOriginalStatusWithoutOpeningTheErrorUrl() throws Exception {
+        mvc.perform(get("/error")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/error").with(request -> { request.setDispatcherType(jakarta.servlet.DispatcherType.ERROR); return request; })
+                        .requestAttr(jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE, 500))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void invalidJsonAndInvalidLengthsReturnEmpty400WithoutWrites() throws Exception {
+        for (String body : List.of("{", "{}", "{\"email\":\"new@example.invalid\",\"firstName\":\"ab\",\"lastName\":\"Valid\",\"password\":\"Secret!123\"}")) {
+            mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest()).andExpect(content().string(""));
+        }
+        var invalid = json.readTree(sessionBody("Too long"));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) invalid).put("description", "x".repeat(2501));
+        mvc.perform(authenticated(post("/api/session"), admin).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest()).andExpect(content().string(""));
+        assertThat(users.count()).isEqualTo(2);
+        assertThat(sessions.count()).isEqualTo(1);
+    }
+
+    @Test
+    void missingTeacherAndParticipantReferencesReturn404WithoutWrites() throws Exception {
+        var body = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(sessionBody("Missing relation"));
+        body.put("teacher_id", 999999999);
+        mvc.perform(authenticated(post("/api/session"), admin).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
+                .andExpect(status().isNotFound()).andExpect(content().string(""));
+        body.put("teacher_id", teacher.getId());
+        body.putArray("users").add(999999999);
+        mvc.perform(authenticated(post("/api/session"), admin).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
+                .andExpect(status().isNotFound()).andExpect(content().string(""));
+        assertThat(sessions.count()).isEqualTo(1);
+    }
+
+    @Test
     void invalidBodiesDoNotCreateResources() throws Exception {
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());

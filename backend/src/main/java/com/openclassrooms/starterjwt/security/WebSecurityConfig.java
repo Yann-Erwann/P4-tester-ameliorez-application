@@ -3,6 +3,7 @@ package com.openclassrooms.starterjwt.security;
 import com.openclassrooms.starterjwt.security.jwt.AuthTokenFilter;
 import com.openclassrooms.starterjwt.security.services.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,6 +57,7 @@ public class WebSecurityConfig {
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         // No auth needed on :
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/**").authenticated()

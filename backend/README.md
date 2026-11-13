@@ -56,6 +56,13 @@ uniquement son nom, sa description, sa date et son enseignant. Elle conserve
 les participants et la date de création ; les inscriptions passent par les
 routes de participation. Une séance absente renvoie 404, sans tentative de sauvegarde.
 
+Les corps JSON illisibles et les erreurs de validation renvoient 400 avec un
+corps vide. Une référence d’enseignant ou de participant inexistante renvoie
+404. Une violation de contrainte SQL résiduelle renvoie 409, sans exposer la
+requête SQL ni les valeurs concernées. Le doublon d’adresse détecté lors de
+l’inscription conserve son message JSON 400 ; une course d’insertion est un
+conflit 409.
+
 ### Autorisations
 
 La création, la modification et la suppression de séances exigent le rôle
