@@ -67,8 +67,14 @@ l’URL corresponde à celui de l’identité authentifiée, y compris pour un a
 
 Un appel anonyme reçoit 401 ; une opération interdite à un utilisateur connecté
 reçoit 403 avec un corps vide. Le refus de suppression du compte d’un tiers
-conserve son contrat historique 401. Les contraintes SQL et la suppression
-d’un compte encore inscrit sont vérifiées séparément.
+conserve son contrat historique 401.
+
+### Suppression d’un compte inscrit
+
+La suppression de son propre compte retire ses inscriptions de toutes les
+séances, puis supprime le compte dans la même transaction. Les séances,
+enseignants et inscriptions des autres membres sont conservés. Aucun effacement
+en cascade des séances n’est configuré ; les clés étrangères restent actives.
 
 ## Démarrage du back
 Pour démarrer le back, il :

@@ -4,6 +4,7 @@ import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.exception.NotFoundException;
 import com.openclassrooms.starterjwt.exception.UnauthorizedOperationException;
 import com.openclassrooms.starterjwt.repository.UserRepository;
+import com.openclassrooms.starterjwt.repository.SessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +14,11 @@ import java.util.Objects;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    private final SessionRepository sessionRepository;
+
+    public UserService(UserRepository userRepository, SessionRepository sessionRepository) {
         this.userRepository = userRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Transactional
@@ -23,6 +27,11 @@ public class UserService {
         if (!Objects.equals(user.getEmail(), requestingEmail)) {
             throw new UnauthorizedOperationException();
         }
+        for (var session : sessionRepository.findAllByUsers_Id(id)) {
+            session.getUsers().removeIf(participant -> participant.getId().equals(id));
+        }
+        // Flush the owning collections before deleting the referenced account.
+        sessionRepository.flush();
         this.userRepository.delete(user);
     }
 
