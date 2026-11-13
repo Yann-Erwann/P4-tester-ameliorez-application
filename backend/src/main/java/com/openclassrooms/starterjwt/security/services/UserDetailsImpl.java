@@ -8,7 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Objects;
 
 @Builder
@@ -31,7 +32,7 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new HashSet<GrantedAuthority>();
+        return List.of(new SimpleGrantedAuthority(Boolean.TRUE.equals(admin) ? "ROLE_ADMIN" : "ROLE_USER"));
     }
 
     @Override

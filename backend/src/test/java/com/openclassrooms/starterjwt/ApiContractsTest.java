@@ -301,9 +301,50 @@ class ApiContractsTest {
     @Test
     void participationRequiresExistingSessionAndUser() throws Exception {
         mvc.perform(authenticated(post("/api/session/999999999/participate/{id}", owner.getId()), owner)).andExpect(status().isNotFound());
-        mvc.perform(authenticated(post("/api/session/{id}/participate/999999999", session.getId()), owner)).andExpect(status().isNotFound());
+        mvc.perform(authenticated(post("/api/session/{id}/participate/999999999", session.getId()), owner)).andExpect(status().isForbidden());
         mvc.perform(authenticated(delete("/api/session/999999999/participate/{id}", owner.getId()), owner)).andExpect(status().isNotFound());
         assertThat(session.getUsers()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void sessionMutationsRequireAnAdministrator(boolean anonymous) throws Exception {
+        var create = post("/api/session").contentType(MediaType.APPLICATION_JSON).content(sessionBody("Forbidden"));
+        var update = put("/api/session/{id}", session.getId()).contentType(MediaType.APPLICATION_JSON).content(sessionBody("Forbidden"));
+        var delete = delete("/api/session/{id}", session.getId());
+        for (var request : List.of(create, update, delete)) {
+            mvc.perform(anonymous ? request : authenticated(request, owner))
+                    .andExpect(status().is(anonymous ? 401 : 403)).andExpect(content().string(""));
+        }
+        assertThat(sessions.count()).isEqualTo(1);
+        entityManager.clear();
+        assertThat(sessions.findById(session.getId()).orElseThrow().getName()).isEqualTo("Morning yoga");
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void nobodyCanEnrollOrRemoveAnotherMember(boolean asAdmin) throws Exception {
+        User caller = asAdmin ? admin : owner;
+        User target = asAdmin ? owner : admin;
+        String path = "/api/session/" + session.getId() + "/participate/" + target.getId();
+        mvc.perform(authenticated(post(path), caller)).andExpect(status().isForbidden()).andExpect(content().string(""));
+        assertThat(session.getUsers()).isEmpty();
+        session.getUsers().add(target);
+        sessions.saveAndFlush(session);
+        mvc.perform(authenticated(delete(path), caller)).andExpect(status().isForbidden()).andExpect(content().string(""));
+        entityManager.clear();
+        assertThat(sessions.findById(session.getId()).orElseThrow().getUsers()).extracting(User::getId).containsExactly(target.getId());
+    }
+
+    @Test
+    void authorizationReloadsRolesFromDatabaseInsteadOfTrustingTheClient() throws Exception {
+        var request = authenticated(delete("/api/session/{id}", session.getId()), admin);
+        admin.setAdmin(false);
+        users.saveAndFlush(admin);
+        mvc.perform(request).andExpect(status().isForbidden());
+        assertThat(sessions.findById(session.getId())).isPresent();
+        assertThat(identities.loadUserByUsername(owner.getEmail()).getAuthorities())
+                .extracting(org.springframework.security.core.GrantedAuthority::getAuthority).containsExactly("ROLE_USER");
     }
 
     @Test

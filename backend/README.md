@@ -56,10 +56,19 @@ uniquement son nom, sa description, sa date et son enseignant. Elle conserve
 les participants et la date de création, les inscriptions passent par les
 routes de participation. Une séance absente renvoie 404, sans tentative de sauvegarde.
 
-Ces contrôles ne constituent pas un audit complet des autorisations. Les règles
-d’accès aux modifications de séances, l’inscription d’un autre utilisateur,
-les contraintes SQL et la suppression d’un compte encore inscrit nécessitent
-une vérification distincte.
+### Autorisations
+
+La création, la modification et la suppression de séances exigent le rôle
+`ADMIN` dans `SessionService`. Les autorités sont rechargées depuis la base à
+chaque requête authentifiée : un rôle fourni par le client ne donne aucun droit.
+Les lectures restent accessibles aux utilisateurs connectés. Les routes de
+participation et de désinscription exigent que l’identifiant utilisateur de
+l’URL corresponde à celui de l’identité authentifiée, y compris pour un admin.
+
+Un appel anonyme reçoit 401, une opération interdite à un utilisateur connecté
+reçoit 403 avec un corps vide. Le refus de suppression du compte d’un tiers
+conserve son contrat historique 401. Les contraintes SQL et la suppression
+d’un compte encore inscrit sont vérifiées séparément.
 
 ## Démarrage du back
 Pour démarrer le back, il :
