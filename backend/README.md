@@ -76,6 +76,13 @@ Un appel anonyme reçoit 401, une opération interdite à un utilisateur connect
 reçoit 403 avec un corps vide. Le refus de suppression du compte d’un tiers
 conserve son contrat historique 401.
 
+### Journalisation
+
+La création d’une séance journalise uniquement son identifiant. Les empreintes
+de mot de passe sont exclues de `User.toString()` et les participants sont
+exclus de `Session.toString()`. Un test capture les logs avec des marqueurs
+synthétiques pour vérifier l’absence d’informations sensibles.
+
 ### Suppression d’un compte inscrit
 
 La suppression de son propre compte retire ses inscriptions de toutes les

@@ -69,6 +69,7 @@ public class Session {
             name = "PARTICIPATE",
             joinColumns = @JoinColumn(name = "session_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @ToString.Exclude
     private List<User> users;
 
     @CreatedDate

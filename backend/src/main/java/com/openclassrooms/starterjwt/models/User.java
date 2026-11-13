@@ -61,6 +61,7 @@ public class User {
     @NonNull
     @Size(max = 120)
     @Column(nullable = false)
+    @ToString.Exclude
     private String password;
 
     private boolean admin;
