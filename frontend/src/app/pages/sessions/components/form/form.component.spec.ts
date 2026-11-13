@@ -21,6 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Teacher } from '../../../../core/models/teacher.interface';
 
 import { FormComponent } from './form.component';
+import { NotFoundComponent } from '../../../not-found/not-found.component';
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -69,6 +70,28 @@ describe('FormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
     expect(component.sessionForm?.invalid).toBe(true);
+  });
+
+  it.each([false, true])('returns to sessions without saving when back is clicked (update: %s)', async (update) => {
+    const router = TestBed.inject(Router);
+    router.resetConfig([
+      { path: 'sessions', component: NotFoundComponent },
+      { path: 'sessions/create', component: NotFoundComponent },
+      { path: 'sessions/update/:id', component: NotFoundComponent },
+    ]);
+    await router.navigateByUrl(update ? '/sessions/update/1' : '/sessions/create');
+    if (update) {
+      component.ngOnInit();
+      http.expectOne('api/session/1').flush({ id: 1, name: 'Yoga', date: '2026-12-01', teacher_id: 7, description: 'Practice', users: [] });
+    }
+    component.sessionForm!.patchValue({ name: 'Unsaved change' });
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    element.querySelector<HTMLButtonElement>('button[routerLink="/sessions"]')!.click();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/sessions');
+    http.expectNone(request => ['POST', 'PUT', 'DELETE'].includes(request.method));
   });
 
   it('shows the create title and saves the form values', () => {
