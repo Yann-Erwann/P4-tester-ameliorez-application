@@ -9,22 +9,17 @@ import { SessionService } from './core/service/session.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { ɵMatchMedia, ɵMockMatchMedia } from '@angular/flex-layout/core';
 
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ɵMockMatchMedia],
       imports: [
         AppComponent,
         RouterTestingModule,
         HttpClientTestingModule,
         MatToolbarModule
       ],
-    }).overrideProvider(ɵMatchMedia, {
-      useFactory: (media: ɵMockMatchMedia): ɵMockMatchMedia => media,
-      deps: [ɵMockMatchMedia],
     }).compileComponents();
   });
 

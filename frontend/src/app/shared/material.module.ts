@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { PortalModule } from '@angular/cdk/portal';
@@ -30,6 +31,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 
 const materialModules = [
+  FlexLayoutModule,
   ReactiveFormsModule,
   CdkTreeModule,
   MatAutocompleteModule,

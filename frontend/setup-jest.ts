@@ -3,6 +3,21 @@ import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
 setupZoneTestEnv();
 
 /* global mocks for jsdom */
+// JSDOM has no matchMedia; responsive layout is verified separately in Chromium.
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn((query: string): MediaQueryList => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(() => false),
+  })),
+});
+
 const mock = () => {
   let storage: { [key: string]: string } = {};
   return {
@@ -15,10 +30,6 @@ const mock = () => {
 
 Object.defineProperty(window, 'localStorage', { value: mock() });
 Object.defineProperty(window, 'sessionStorage', { value: mock() });
-Object.defineProperty(window, 'getComputedStyle', {
-  value: () => ['-webkit-appearance'],
-});
-
 Object.defineProperty(document.body.style, 'transform', {
   value: () => {
     return {
