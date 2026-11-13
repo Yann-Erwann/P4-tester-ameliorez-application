@@ -99,6 +99,15 @@ divisée par la même somme de toutes les suites XML. La dernière exécution H2
 compte 34 intégrations sur 63 tests exécutés (53,97 %). MySQL ajoute cinq cas
 d’intégration quand sa variable est renseignée. Les fichiers XML permettent de
 recalculer ce ratio après chaque évolution, le minimum demandé est 30 %.
+La vérification complète avec MySQL a passé **68 tests, dont 39 intégrations
+(57,35 %)**, sans échec ni test ignoré. Les couvertures globales mesurées sont :
+98,58 % instructions, 95,24 % branches, 98,29 % lignes, 96 % complexité,
+98,15 % méthodes et 100 % classes. Les seuils sont contrôlés par package,
+les rapports XML/HTML précisent les dénominateurs et le périmètre exclu.
+
+La grille d’évaluation fournie couvre tests unitaires/intégration, proportion,
+rapports multi-indicateurs et procédures README. La matrice ci-dessus relie
+ces critères aux classes réellement exécutées.
 
 ## Responsabilités et erreurs HTTP
 
@@ -163,6 +172,9 @@ enseignants et inscriptions des autres membres sont conservés. Aucun effacement
 en cascade des séances n’est configuré, les clés étrangères restent actives.
 
 ## Validation locale du 13 novembre 2026
+
+Résultats de la reprise du code avant la partie 2, les nouveaux seuils et
+résultats de tests sont présentés dans la section Partie 2 ci-dessus.
 
 | Contrôle | Résultat |
 | --- | --- |
@@ -323,7 +335,7 @@ Dans l'onglet ```Exec```, il faut :
     use test;
     ```
 
-3. Copier le contenu du fichier `ressources/sql/insert_user.sql` et l'exécuter dans l'invite de commande :
+3. Copier le contenu du fichier `src/main/resources/sql/insert_user.sql` et l'exécuter dans l'invite de commande :
 
     ```
     INSERT INTO users(first_name, last_name, admin, email, password) VALUES ('Admin', 'Admin', true, 'yoga@studio.com', '$2a$10$.Hsa/ZjUVaHqi0tp9xieMeewrnZxrZ5pQRzddUXE/WjDu2ZThe6Iq');
