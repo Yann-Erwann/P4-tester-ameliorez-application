@@ -7,6 +7,7 @@ import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.repository.SessionRepository;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,11 +25,13 @@ public class SessionService {
         this.userRepository = userRepository;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Session create(Session session) {
         return this.sessionRepository.save(Objects.requireNonNull(session));
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         this.sessionRepository.delete(getById(id));
     }
@@ -42,6 +45,7 @@ public class SessionService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Session update(Long id, Session changes) {
         Session existing = getById(id);
         existing.setName(changes.getName());
@@ -53,6 +57,7 @@ public class SessionService {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and #p1 == principal.id")
     public void participate(Long id, Long userId) {
         Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
         User user = this.userRepository.findById(Objects.requireNonNull(userId)).orElse(null);
@@ -71,6 +76,7 @@ public class SessionService {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and #p1 == principal.id")
     public void noLongerParticipate(Long id, Long userId) {
         Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
         if (session == null) {
