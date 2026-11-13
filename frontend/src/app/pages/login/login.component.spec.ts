@@ -13,7 +13,7 @@ import { SessionService } from 'src/app/core/service/session.service';
 
 import { LoginComponent } from './login.component';
 
-describe('LoginComponent', () => {
+describe('[integration] J-I02 LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let http: HttpTestingController;

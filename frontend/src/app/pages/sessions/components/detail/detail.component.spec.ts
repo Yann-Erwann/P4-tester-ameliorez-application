@@ -11,7 +11,7 @@ import { SessionService } from '../../../../core/service/session.service';
 import { DetailComponent } from './detail.component';
 
 
-describe('DetailComponent', () => {
+describe('[integration] J-I02 DetailComponent', () => {
   let component: DetailComponent;
   let fixture: ComponentFixture<DetailComponent>;
   let http: HttpTestingController;

@@ -23,7 +23,7 @@ import { Teacher } from '../../../../core/models/teacher.interface';
 import { FormComponent } from './form.component';
 import { NotFoundComponent } from '../../../not-found/not-found.component';
 
-describe('FormComponent', () => {
+describe('[integration] J-I02 FormComponent', () => {
   let component: FormComponent;
   let fixture: ComponentFixture<FormComponent>;
   let http: HttpTestingController;

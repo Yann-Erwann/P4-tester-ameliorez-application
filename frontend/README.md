@@ -1,73 +1,64 @@
-# Yoga
+# Yoga — frontend Angular 19
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.16.
+Depuis la racine du dépôt, entrer dans `frontend/`. Utiliser Node 20 et npm
+(versions vérifiées : Node 20.19.2, npm 9.2.0), puis installer les dépendances
+à partir du lockfile :
 
-## Start the project
+```bash
+cd frontend
+npm ci
+npm start
+```
 
-Git clone:
+`npm start` utilise `ng serve`. Le serveur et son proxy doivent viser le backend
+Spring démarré selon [son README](../backend/README.md). Si les ports usuels sont
+occupés, conserver les autres applications et utiliser un proxy temporaire hors
+du dépôt, par exemple `/tmp/yoga-real-proxy.json` pointant `/api` vers Spring 8082 :
 
-> git clone https://github.com/OpenClassrooms-Student-Center/P5-Full-Stack-testing
+```bash
+npm start -- --host 127.0.0.1 --port 4202 --proxy-config /tmp/yoga-real-proxy.json
+```
 
-Go inside folder:
-
-> cd yoga
-
-Install dependencies:
-
-> npm install
-
-Launch Front-end:
-
-> npm run start;
-
-
-### Test
-
-#### E2E
-
-Launching e2e test:
-
-> npm run e2e
-
-Generate coverage report (you should launch e2e test before):
-
-> npm run e2e:coverage
-
-Report is available here:
-
-> front/coverage/lcov-report/index.html
-
-#### Unitary test
-
-Launching test:
-
-> npm run test
-
-for following change:
-
-> npm run test:watch
-
-### Vérifications avant les améliorations
-
-Depuis `frontend/`, exécuter les tests unitaires sans surveillance :
+## Partie 2 — Jest : unitaires et intégration
 
 ```bash
 npm test -- --ci --runInBand
-```
-
-Jest utilise `jest.config.js` et l’environnement Angular initialisé dans
-`setup-jest.ts`. Les composants standalone sont importés dans les tests ; les
-requêtes sont simulées par les outils HTTP de test Angular. Ces tests ne
-nécessitent pas le backend ou MySQL et ne remplacent pas les parcours réels.
-
-Lancer l’analyse TypeScript et des templates avec :
-
-```bash
+npm run test:coverage
 npm run lint
 ```
 
-La cible `lint` d’`angular.json` utilise `eslint.config.cjs`, au format ESLint 9.
-Les contrôles concernent `src/**/*.ts`, y compris les tests et templates
-intégrés, ainsi que `src/**/*.html`. Un code de sortie non nul doit être traité
-comme un diagnostic à examiner ; les règles existantes restent actives pendant
-la remise en état de l’outillage.
+Jest utilise `jest.config.js`, `setup-jest.ts` et l’environnement Angular/JSDOM.
+La collecte inclut **tous** les fichiers `src/app/**/*.ts`, même non importés par
+un test, en excluant uniquement les fichiers de tests. Les interfaces ne
+produisent pas de code exécutable, démarrage, polyfills et configuration de
+l’outillage sont hors de ce périmètre applicatif. Les seuils globaux bloquants
+sont **80 % pour instructions, branches, fonctions et lignes**, séparément.
+
+Rapports produits dans `coverage/jest/` : `index.html`, `lcov.info`,
+`coverage-final.json`, `coverage-summary.json` et, par `test:coverage`,
+`test-results.json`. Les rapports générés restent exclus de Git.
+
+| Catégorie | Scénarios et frontière de test |
+| --- | --- |
+| `[unit]` J-U01 | État de session et décisions des gardes, navigation espionnée, sans écran distant. |
+| `[unit]` J-U02 | Durée de vie des requêtes des composants, templates remplacés, annulation à la destruction et absence d’effet tardif. |
+| `[unit]` J-U03 | Création des services et contrôles isolés conservés. |
+| `[integration]` J-I01/J-I03 | Services réels, configuration HttpClient et intercepteur JWT réels, avec HttpTestingController uniquement à la frontière réseau. Méthodes, chemins, corps, jeton et propagation des erreurs. |
+| `[integration]` J-I02 | Composant + vrai template + formulaires/routeur/services Angular, requêtes contrôlées par HttpTestingController, sans serveur Spring. Conditions, listes, actions, navigation et erreurs déjà gérées par l’application. |
+
+Les cas paramétrés comptent individuellement. La dernière suite comporte
+**69 tests réussis, dont 47 intégrations (68,12 %)**, au-dessus des 30 % demandés.
+Après chaque évolution, recalculer le ratio depuis le rapport réellement exécuté :
+
+```bash
+node -e 'const r=require("./coverage/jest/test-results.json");const tests=r.testResults.flatMap(s=>s.assertionResults).filter(t=>t.status==="passed");const integration=tests.filter(t=>t.fullName.includes("[integration]"));const ratio=integration.length/tests.length;console.log({total:tests.length,integration:integration.length,percent:100*ratio});if(ratio<0.30)process.exit(1)'
+```
+
+Cette classification décrit les collaborateurs réellement présents : un test
+avec HttpTestingController n’est pas un appel à Spring/MySQL. Les tests de
+durée de vie qui remplacent le template ne sont pas comptés comme intégrations.
+
+Le « plan de testing fourni » mentionné dans le sujet n’est pas présent dans le
+dépôt au début de cette partie. Les identifiants ci-dessus et ci-dessous sont
+une matrice de travail explicite, à rapprocher de ce plan lorsqu’il est disponible ;
+ils ne constituent pas une affirmation de conformité à un document absent.

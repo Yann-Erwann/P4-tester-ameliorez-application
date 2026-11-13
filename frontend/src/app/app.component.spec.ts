@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 
-describe('AppComponent', () => {
+describe('[integration] J-I02 AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [

@@ -3,7 +3,7 @@ import { expect } from '@jest/globals';
 
 import { NotFoundComponent } from './not-found.component';
 
-describe('NotFoundComponent', () => {
+describe('[integration] J-I02 NotFoundComponent', () => {
   let component: NotFoundComponent;
   let fixture: ComponentFixture<NotFoundComponent>;
 

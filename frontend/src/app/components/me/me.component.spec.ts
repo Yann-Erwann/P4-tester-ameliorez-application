@@ -9,7 +9,7 @@ import { SessionService } from 'src/app/core/service/session.service';
 
 import { MeComponent } from './me.component';
 
-describe('MeComponent', () => {
+describe('[integration] J-I02 MeComponent', () => {
   let component: MeComponent;
   let fixture: ComponentFixture<MeComponent>;
   let http: HttpTestingController;

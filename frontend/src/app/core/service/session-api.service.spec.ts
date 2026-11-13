@@ -4,7 +4,7 @@ import { expect } from '@jest/globals';
 
 import { SessionApiService } from './session-api.service';
 
-describe('SessionsService', () => {
+describe('[unit] J-U03 SessionsService', () => {
   let service: SessionApiService;
 
   beforeEach(() => {

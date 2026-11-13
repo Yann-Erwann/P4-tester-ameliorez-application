@@ -4,7 +4,7 @@ import { expect } from '@jest/globals';
 
 import { UserService } from './user.service';
 
-describe('UserService', () => {
+describe('[unit] J-U03 UserService', () => {
   let service: UserService;
 
   beforeEach(() => {
