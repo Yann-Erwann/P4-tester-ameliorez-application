@@ -55,6 +55,51 @@ clés étrangères, unicité des adresses et unicité de la séance par enseigna
 Les essais HTTP sur serveur et les parcours navigateur sont des vérifications
 complémentaires.
 
+## Partie 2 — tests unitaires et intégration
+
+La commande complète `mise exec java@21 maven@3.9.3 -- mvn -B clean verify`
+exécute JUnit 5 / Mockito et les intégrations Spring Boot Test avec H2. Pour
+inclure MySQL, utiliser la variable `YOGA_MYSQL_TEST_URL` présentée ci-dessus.
+Les tests MySQL utilisent la base existante en `validate` et annulent leurs
+fixtures, les tests H2 créent uniquement une base en mémoire isolée.
+
+| Périmètre | Tests et scénarios |
+| --- | --- |
+| Unitaire B-U01 | AuthServiceTest : inscription non admin, hachage via encodeur, doublon sans écriture, rôle persistant, mauvais identifiants sans JWT. |
+| Unitaire B-U02 | TeacherServiceTest : liste, absence et recherches obligatoire/facultative. |
+| Unitaire B-U03 | SessionServiceTest : édition sans perte de membres, ressource absente, inscription en doublon, retrait préservant les autres membres. |
+| Unitaire B-U04 | UserServiceTest et ServiceResponsibilitiesTest : propriété, existence, suppression des seules inscriptions avant le compte. |
+| Intégration B-I01 | ApiContractsTest (`@Tag("integration")`) : les quatre contrôleurs via MockMvc, vraie chaîne Spring Security/JWT, services, mappers et JPA/H2. |
+| Intégration B-I02 | MySqlPersistenceTest (`@Tag("integration")`) : clés étrangères, unicités, édition et suppression de compte inscrit avec relecture persistée. |
+
+Les tests Mockito isolent les repositories et les collaborateurs externes,
+les tests d’intégration utilisent le contexte `@SpringBootTest`, pas un mock
+de service. Les DTO ne font pas l’objet de tests dédiés : `dto/**` et `payload/**`
+sont exclus de JaCoCo conformément au périmètre demandé. Les DTO peuvent servir
+de données d’entrée aux tests de contrat sans tester leurs accesseurs.
+`lombok.config` marque le code généré par Lombok, JaCoCo filtre ce code généré,
+mais conserve le code écrit à la main, les services, la sécurité et les mappers.
+
+JaCoCo échoue sous 80 % pour **instructions, branches, complexité, méthodes et
+classes**, par package, et conserve le seuil existant de **90 % des lignes**.
+Aucun contrôle d’architecture n’est désactivé. Rapports :
+`target/site/jacoco/index.html`, `target/site/jacoco/jacoco.xml` et
+`target/surefire-reports/TEST-*.xml`.
+
+Pour sélectionner les intégrations seules :
+
+```bash
+mise exec java@21 maven@3.9.3 -- mvn -B -Dgroups=integration test
+```
+
+Cette sélection ne remplace pas `verify`, qui mesure la suite complète.
+La proportion d’intégration se calcule sur les cas exécutés, en excluant les
+cas ignorés : somme des attributs `tests - skipped` des deux suites annotées,
+divisée par la même somme de toutes les suites XML. La dernière exécution H2
+compte 34 intégrations sur 63 tests exécutés (53,97 %). MySQL ajoute cinq cas
+d’intégration quand sa variable est renseignée. Les fichiers XML permettent de
+recalculer ce ratio après chaque évolution, le minimum demandé est 30 %.
+
 ## Responsabilités et erreurs HTTP
 
 Les contrôleurs délèguent les opérations métier aux services. `AuthService`
