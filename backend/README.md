@@ -26,9 +26,15 @@ mise exec java@21 maven@3.9.3 -- mvn -B clean verify
 ```
 
 Ces commandes utilisent Java 21 et Maven 3.9.3 sans changer le Java du système.
-Le backend ne contient pas encore de tests automatisés : `verify` contrôle
-actuellement la compilation et la génération du JAR, sans démontrer l’absence
-de régression fonctionnelle.
+`verify` exécute les tests HTTP avec Spring Security, JWT, JPA et une base H2
+isolée, ainsi que les tests de validation des jetons et de mapping. Ces tests
+ne nécessitent pas Docker et ne modifient pas MySQL. JaCoCo 0.8.12, compatible
+Java 21, impose le seuil existant de 90 % des lignes par package, le rapport
+est disponible dans `target/site/jacoco/index.html`.
+
+Les résultats JUnit sont dans `target/surefire-reports/`. H2 ne remplace pas
+une validation avec MySQL : vérifier séparément les contraintes SQL et les
+parcours contre le serveur réel.
 
 ## Démarrage du back
 Pour démarrer le back, il :

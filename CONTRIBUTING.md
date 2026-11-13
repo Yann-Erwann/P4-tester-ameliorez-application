@@ -106,9 +106,10 @@ mise exec java@21 maven@3.9.3 -- mvn -B verify
 ```
 
 Après suppression ou déplacement de classes, employer `clean verify` pour écarter
-les anciennes classes. Le backend Yoga ne contient actuellement aucun test
-Java automatisé : une réussite de Maven prouve la compilation et la construction
-du JAR, sans valider les accès SQL, les autorisations ou les parcours utilisateur.
+les anciennes classes. Les tests backend exercent les contrats HTTP avec Spring
+Security et une base H2 isolée, les JWT et les mappers. JaCoCo impose 90 % des
+lignes par package. Une réussite ne valide pas les contraintes propres à MySQL
+ni tous les parcours utilisateur ; vérifier ces éléments séparément.
 
 `ARCH-001` impose controller → service → repository. Vérifier si un test
 l’automatise avant d’annoncer sa couverture ; aucun `ArchitectureTests` n’est
