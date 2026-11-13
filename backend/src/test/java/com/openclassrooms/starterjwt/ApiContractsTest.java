@@ -288,6 +288,28 @@ class ApiContractsTest {
     }
 
     @Test
+    void deletingAnEnrolledAccountRemovesOnlyItsOwnMemberships() throws Exception {
+        Teacher secondTeacher = teachers.save(Teacher.builder().firstName("Second").lastName("Teacher").build());
+        Session secondSession = sessions.save(Session.builder().name("Evening yoga").description("Practice")
+                .date(new Date()).teacher(secondTeacher).users(new ArrayList<>(List.of(owner))).build());
+        session.getUsers().addAll(List.of(owner, admin));
+        sessions.saveAndFlush(session);
+        long ownerId = owner.getId();
+        long firstId = session.getId();
+        long secondId = secondSession.getId();
+        mvc.perform(authenticated(delete("/api/user/{id}", ownerId), owner))
+                .andExpect(status().isOk()).andExpect(content().string(""));
+        users.flush();
+        entityManager.clear();
+        assertThat(users.findById(ownerId)).isEmpty();
+        assertThat(users.findById(admin.getId())).isPresent();
+        assertThat(sessions.findById(firstId).orElseThrow().getUsers()).extracting(User::getId).containsExactly(admin.getId());
+        assertThat(sessions.findById(secondId).orElseThrow().getUsers()).isEmpty();
+        assertThat(sessions.count()).isEqualTo(2);
+        assertThat(teachers.count()).isEqualTo(2);
+    }
+
+    @Test
     void participationAndRemovalKeepEmptySuccessResponsesAndPersistMembership() throws Exception {
         String path = "/api/session/" + session.getId() + "/participate/" + owner.getId();
         mvc.perform(authenticated(post(path), owner)).andExpect(status().isOk()).andExpect(content().string(""));

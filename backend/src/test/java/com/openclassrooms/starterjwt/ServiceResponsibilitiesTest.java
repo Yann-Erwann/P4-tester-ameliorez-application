@@ -32,7 +32,7 @@ class ServiceResponsibilitiesTest {
     @Test
     void accountDeletionEnforcesExistenceAndOwnershipInsideTheService() {
         UserRepository users = mock(UserRepository.class);
-        UserService service = new UserService(users);
+        UserService service = new UserService(users, mock(SessionRepository.class));
         when(users.findById(42L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.delete(42L, "owner@example.invalid")).isInstanceOf(NotFoundException.class);
         User owner = User.builder().id(7L).email("owner@example.invalid").firstName("Test").lastName("Owner").password("test-only-hash").build();
