@@ -2,14 +2,15 @@
   @if (session) {
     <mat-card>
       <mat-card-title>
-        <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div fxLayout="row" fxLayout.xs="column" fxLayoutAlign="space-between center"
+          fxLayoutAlign.xs="start stretch" fxLayoutGap.xs="8px">
           <div fxLayout="row" fxLayoutAlign="start center">
             <button mat-icon-button (click)="back()">
               <mat-icon>arrow_back</mat-icon>
             </button>
             <h1>{{session.name | titlecase}}</h1>
           </div>
-          <div>
+          <div fxLayout="row" fxLayoutAlign="end center">
             @if (isAdmin) {
               <button mat-raised-button color="warn" (click)="delete()">
                 <mat-icon>delete</mat-icon>
@@ -68,7 +69,7 @@
           {{ session.description }}
           <br>
         </div>
-        <div class="date" class="my2" fxLayout="row" fxLayoutAlign="space-between center">
+        <div class="date my2" fxLayout="row" fxLayoutAlign="space-between center">
           <div class="created"><i>Create at: </i> {{ session.createdAt| date: 'longDate'}}</div>
           <div class="updated"><i>Last update: </i> {{ session.updatedAt| date: 'longDate'}}</div>
         </div>
