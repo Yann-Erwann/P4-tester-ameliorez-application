@@ -36,6 +36,24 @@ Les résultats JUnit sont dans `target/surefire-reports/`. H2 ne remplace pas
 une validation avec MySQL : vérifier séparément les contraintes SQL et les
 parcours contre le serveur réel.
 
+### Tests avec le MySQL existant
+
+Pour compléter H2, relever le port de MySQL comme décrit plus bas et exécuter
+depuis `backend/`, avec les identifiants du fichier `.env` existant :
+
+```bash
+YOGA_MYSQL_TEST_URL=jdbc:mysql://127.0.0.1:32768/test mise exec java@21 maven@3.9.3 -- mvn -B clean verify
+```
+
+Remplacer l’URL par celle de la base Yoga visée. `MySqlPersistenceTest` utilise
+uniquement `ddl-auto=validate` et ses propres fixtures transactionnelles annulées
+en fin de test ; aucune table ni volume n’est recréé. Les compteurs automatiques
+peuvent avancer malgré le rollback. Sans cette variable, ces tests MySQL sont
+explicitement ignorés, tandis que les tests H2 restent exécutés. Ces tests
+vérifient suppression d’un compte inscrit, maintien des participants à l’édition,
+clés étrangères et unicité des adresses. Les essais HTTP sur serveur et les
+parcours navigateur sont des vérifications complémentaires.
+
 ## Responsabilités et erreurs HTTP
 
 Les contrôleurs délèguent les opérations métier aux services. `AuthService`
