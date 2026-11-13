@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import {Router, RouterModule, RouterOutlet} from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './core/service/auth.service';
@@ -8,7 +9,7 @@ import {MaterialModule} from "./shared/material.module";
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, MaterialModule, RouterOutlet, RouterModule],
+  imports: [CommonModule, FlexLayoutModule, MaterialModule, RouterOutlet, RouterModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
