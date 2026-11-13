@@ -7,6 +7,10 @@
     .item {
       min-width: 250px;
 
+      mat-card-actions {
+        gap: 8px;
+      }
+
       .picture {
         max-width: min(400px, 100%);
         height: auto;
