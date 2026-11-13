@@ -9,4 +9,17 @@
     .link + .link {
         margin-left: 10px;
     }
+
+    @media (max-width: 359px) {
+        mat-toolbar {
+            height: auto;
+            min-height: 56px;
+            gap: 8px;
+            padding-block: 8px;
+        }
+
+        .navigation {
+            margin-left: auto;
+        }
+    }
 }
