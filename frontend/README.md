@@ -10,14 +10,9 @@ npm ci
 npm start
 ```
 
-`npm start` utilise `ng serve`. Le serveur et son proxy doivent viser le backend
-Spring démarré selon [son README](../backend/README.md). Si les ports usuels sont
-occupés, conserver les autres applications et utiliser un proxy temporaire hors
-du dépôt, par exemple `/tmp/yoga-real-proxy.json` pointant `/api` vers Spring 8082 :
-
-```bash
-npm start -- --host 127.0.0.1 --port 4202 --proxy-config /tmp/yoga-real-proxy.json
-```
+`npm start` utilise `ng serve` et le fichier versionné `proxy.conf.json` pour
+transmettre les requêtes `/api` à Spring sur le port 8080. Le
+[README backend](../backend/README.md) décrit le démarrage de Spring et de MySQL.
 
 ## Partie 2 — Jest : unitaires et intégration
 
@@ -115,12 +110,20 @@ seuil : chaque partie dispose de son propre rapport et contrôle.
 
 ### Contrôle complémentaire avec Spring/MySQL réels
 
-Dans un environnement où Angular doit viser Spring 8082, relancer uniquement le
-serveur de test avec le proxy temporaire existant :
+Depuis `frontend/`, avec Spring sur le port **8080**, démarrer le serveur de test
+avec le proxy fourni dans le dépôt. Si `e2e:serve` occupe déjà le port 4203,
+le relancer avec cette commande.
 
 ```bash
-npm run e2e:serve -- --proxy-config /tmp/yoga-real-proxy.json
+npm run e2e:serve -- --proxy-config proxy.conf.json
 ```
+
+Si Spring écoute sur **8082**, copier `proxy.conf.json` hors du dépôt, par exemple
+dans `/tmp/yoga-proxy.json`, puis remplacer la valeur de `target` dans la copie
+par `http://127.0.0.1:8082`. Utiliser ensuite
+`npm run e2e:serve -- --proxy-config /tmp/yoga-proxy.json`.
+Ce même proxy fonctionne avec `npm start -- --port 4202 --proxy-config /tmp/yoga-proxy.json`
+pour le serveur de développement.
 
 Le backend et MySQL doivent être prêts. Le contrôle réel est en lecture seule et
 nécessite un compte administrateur et au moins une séance avec un enseignant.
