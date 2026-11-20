@@ -107,7 +107,8 @@ utilise le vrai navigateur et les vrais composants/services Angular, avec
 Rapports E2E : `coverage/e2e/index.html`, `lcov.info`, `coverage-summary.json`,
 rapports JUnit dans `coverage/e2e/results/` et captures d’échec dans
 `coverage/e2e/screenshots/`. `npm run e2e:coverage` régénère les rapports et
-**échoue sous 80 % de lignes, instructions, fonctions ou branches**. La
+**échoue si aucune ligne applicative n’a été mesurée ou si l’un des quatre
+indicateurs descend sous 80 %**. La
 couverture E2E n’est pas fusionnée avec Jest pour atteindre artificiellement un
 seuil : chaque partie dispose de son propre rapport et contrôle.
 

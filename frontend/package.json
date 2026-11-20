@@ -8,7 +8,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "e2e:ci": "cypress run --browser electron && npm run e2e:coverage",
-    "e2e:coverage": "nyc report --check-coverage",
+    "e2e:coverage": "nyc report --check-coverage && node -e \"if (!(require('./coverage/e2e/coverage-summary.json').total.lines.total > 0)) throw new Error('No application lines measured by Cypress')\"",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:coverage": "jest --coverage --ci --runInBand --json --outputFile=coverage/jest/test-results.json",
