@@ -89,7 +89,7 @@ npm run e2e:ci
 ```
 
 La configuration Cypress est `cypress.config.ts`, le support de collecte est
-`cypress/support/e2e.ts`, et NYC lit `.nycrc.json`. Cypress découvre les specs
+`cypress/support/e2e.ts`, et NYC lit `nyc.config.cjs`. Cypress découvre les specs
 dans `cypress/e2e/` et ses sous-dossiers. Le parcours `real-api.cy.ts` s’active
 avec `CYPRESS_realApi=true`. La suite `screens.cy.ts`
 utilise le vrai navigateur et les vrais composants/services Angular, avec
@@ -108,7 +108,8 @@ Rapports E2E : `coverage/e2e/index.html`, `lcov.info`, `coverage-summary.json`,
 rapports JUnit dans `coverage/e2e/results/` et captures d’échec dans
 `coverage/e2e/screenshots/`. `npm run e2e:coverage` régénère les rapports et
 **échoue si aucune ligne applicative n’a été mesurée ou si l’un des quatre
-indicateurs descend sous 80 %**. La
+indicateurs descend sous 80 %**. Le runner interactif (`npm run cypress:open`)
+utilise `coverage/e2e-open/` pour sa couverture et ses artefacts. La
 couverture E2E n’est pas fusionnée avec Jest pour atteindre artificiellement un
 seuil : chaque partie dispose de son propre rapport et contrôle.
 
@@ -136,9 +137,8 @@ CYPRESS_realApi=true npm run e2e:ci
 détail/enseignant, compte et déconnexion traversent le proxy Angular, les
 contrôleurs/services Spring et MySQL. Ce contrôle n’insère ni ne supprime de
 données. La suite complète a passé **11 tests sans échec ni test ignoré**.
-La couverture E2E reste indépendante de celle de Jest. Les anciens fichiers de
-couverture bruts et rapports JUnit sont retirés avant chaque nouveau lancement,
-pour que le résultat ne réutilise pas les succès d’une exécution précédente.
+La couverture E2E reste indépendante de celle de Jest. Chaque `cypress run`
+nettoie ses données de couverture brutes et ses résultats JUnit avant la collecte.
 Les dernières mesures E2E sont : 98,21 % instructions, 94,54 % branches,
 100 % fonctions et 98,19 % lignes.
 
