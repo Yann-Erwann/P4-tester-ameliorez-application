@@ -7,8 +7,8 @@ describe('E-R01 real Spring/MySQL integration', () => {
     const email = String(Cypress.env('adminEmail') || 'yoga@studio.com');
     const password = String(Cypress.env('adminPassword') || 'test!1234');
     cy.visit('/login');
-    cy.get('[formControlName=email]').type(email);
-    cy.get('[formControlName=password]').type(password, { log: false });
+    cy.get('[formControlName=email]').type(email, { parseSpecialCharSequences: false });
+    cy.get('[formControlName=password]').type(password, { log: false, parseSpecialCharSequences: false });
     cy.contains('button', 'Submit').click();
     cy.location('pathname').should('eq', '/sessions');
     cy.contains('button', 'Create').should('be.visible');
