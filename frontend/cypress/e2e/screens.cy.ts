@@ -12,7 +12,9 @@ describe('E-S01 screen journeys with controlled API responses', () => {
   let sessions: typeof initial[];
   let admin = false;
   beforeEach(() => {
-    sessions = [{ ...initial, users: [] }]; admin = false;
+    const session: typeof initial = { ...initial, users: [] };
+    const participationPath = `/api/session/${session.id}/participate/${member.id}`;
+    sessions = [session]; admin = false;
     cy.intercept('POST', '**/api/auth/login', request => request.reply({ ...member, admin })).as('login');
     cy.intercept('POST', '**/api/auth/register', { message: 'User registered successfully!' }).as('register');
     cy.intercept('GET', '**/api/teacher', [teacher]).as('teachers');
@@ -33,10 +35,14 @@ describe('E-S01 screen journeys with controlled API responses', () => {
       sessions = sessions.filter(s => s.id !== Number(request.url.split('/').pop())); request.reply({ statusCode: 200, body: '' });
     }).as('deleteSession');
     cy.intercept('POST', '**/api/session/*/participate/*', request => {
-      sessions[0].users = [member.id]; request.reply({ statusCode: 200, body: '' });
+      expect(new URL(request.url).pathname).to.equal(participationPath);
+      session.users.push(member.id);
+      request.reply({ statusCode: 200, body: '' });
     }).as('participate');
     cy.intercept('DELETE', '**/api/session/*/participate/*', request => {
-      sessions[0].users = []; request.reply({ statusCode: 200, body: '' });
+      expect(new URL(request.url).pathname).to.equal(participationPath);
+      session.users = session.users.filter(userId => userId !== member.id);
+      request.reply({ statusCode: 200, body: '' });
     }).as('unparticipate');
   });
 
