@@ -89,7 +89,9 @@ npm run e2e:ci
 ```
 
 La configuration Cypress est `cypress.config.ts`, le support de collecte est
-`cypress/support/e2e.ts`, et NYC lit `.nycrc.json`. La suite `screens.cy.ts`
+`cypress/support/e2e.ts`, et NYC lit `.nycrc.json`. Cypress découvre les specs
+dans `cypress/e2e/` et ses sous-dossiers. Le parcours `real-api.cy.ts` s’active
+avec `CYPRESS_realApi=true`. La suite `screens.cy.ts`
 utilise le vrai navigateur et les vrais composants/services Angular, avec
 `cy.intercept()` à la frontière HTTP pour des scénarios déterministes.
 

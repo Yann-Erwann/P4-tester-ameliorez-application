@@ -11,7 +11,9 @@ export default defineConfig({
     baseUrl: 'http://127.0.0.1:4203',
     supportFile: 'cypress/support/e2e.ts',
     setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): Cypress.PluginConfigOptions {
-      config.specPattern = config.env['realApi'] ? 'cypress/e2e/*.cy.ts' : 'cypress/e2e/screens.cy.ts';
+      if (!config.env['realApi']) {
+        config.excludeSpecPattern = [config.excludeSpecPattern].flat().concat('cypress/e2e/real-api.cy.ts');
+      }
       // Never combine a new run with old coverage or failed JUnit artifacts.
       for (const directory of ['coverage/e2e/.nyc_output', 'coverage/e2e/results']) {
         rmSync(resolve(config.projectRoot, directory), { recursive: true, force: true });
