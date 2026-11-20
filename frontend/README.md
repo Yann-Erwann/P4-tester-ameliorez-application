@@ -28,6 +28,9 @@ npm run lint
 ```
 
 Jest utilise `jest.config.js`, `setup-jest.ts` et l’environnement Angular/JSDOM.
+Pour travailler sur un seul test, utiliser par exemple
+`npm test -- --runInBand src/app/pages/not-found/not-found.component.spec.ts`.
+La commande `npm run test:coverage` active la mesure et les seuils pour la suite complète.
 La collecte inclut **tous** les fichiers `src/app/**/*.ts`, même non importés par
 un test, en excluant uniquement les fichiers de tests. Les interfaces ne
 produisent pas de code exécutable, démarrage, polyfills et configuration de
