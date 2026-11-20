@@ -13,19 +13,27 @@ cd P4-tester-ameliorez-application
 mise install java@21 maven@3.9.3
 ```
 
-Depuis `backend/`, vérifier le fichier d’environnement local puis démarrer Docker
-et le backend :
+**Terminal 1.** Démarrer Docker avec Compose sur la machine qui héberge le
+projet. Depuis la racine du clone, lancer Spring avec le fichier
+`backend/.env` fourni. Spring démarre MySQL via `compose.yaml` et écoute sur le port 8080.
 
 ```bash
+cd backend
 mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
 ```
 
-Dans un second terminal, depuis `frontend/` :
+**Terminal 2.** Depuis la racine du clone, utiliser Node 20.19.2 et npm pour
+installer les dépendances du lockfile et lancer Angular.
 
 ```bash
+cd frontend
 npm ci
 npm start
 ```
+
+Ouvrir l’application sur `http://localhost:4200`. Avec VS Code Remote, transférer
+le port 4200 de la VM dans l’onglet **Ports**, puis ouvrir l’adresse locale
+indiquée sur le Mac. Angular relaie les requêtes `/api` vers Spring.
 
 Le [README backend](backend/README.md) décrit MySQL, les données de démonstration,
 Docker Compose et les ports alternatifs. Le [README frontend](frontend/README.md)
