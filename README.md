@@ -42,11 +42,11 @@ Les deux services doivent être prêts pour les parcours contre l’API réelle.
 
 ## Partie 2 — exécuter les tests et générer les rapports
 
-| Partie | Commande depuis son dossier | Rapports et seuils |
+| Partie | Commande et dossier de travail | Rapports et seuils |
 | --- | --- | --- |
-| Frontend Jest | `npm run test:coverage` | `frontend/coverage/jest/index.html`, JSON et LCOV ; ≥ 80 % instructions, branches, fonctions et lignes. |
-| Frontend Cypress | Démarrer `npm run e2e:serve`, puis `npm run e2e:ci` dans un autre terminal | `frontend/coverage/e2e/index.html`, JSON, LCOV et JUnit ; ≥ 80 % pour chacun des quatre indicateurs. |
-| Backend JUnit/Mockito/H2 | `mise exec java@21 maven@3.9.3 -- mvn -B clean verify` | `backend/target/site/jacoco/index.html` et `target/surefire-reports` ; ≥ 80 % instructions, branches, complexité, méthodes et classes, avec seuil existant de 90 % des lignes par package conservé. |
+| Frontend Jest | Dans `frontend/`, exécuter `npm run test:coverage` | `frontend/coverage/jest/index.html`, JSON et LCOV. Minimum de 80 % pour les instructions, branches, fonctions et lignes. |
+| Frontend Cypress | Dans `frontend/`, lancer `npm run e2e:serve` et attendre la compilation sur le port 4203. Garder ce terminal ouvert et exécuter `npm run e2e:ci` dans un deuxième terminal depuis `frontend/`. | `frontend/coverage/e2e/index.html`, JSON, LCOV et résultats JUnit. Minimum de 80 % pour chacun des quatre indicateurs. |
+| Backend JUnit/Mockito/H2 | Dans `backend/`, exécuter `mise exec java@21 maven@3.9.3 -- mvn -B clean verify` | `backend/target/site/jacoco/index.html` et `backend/target/surefire-reports/`. Par package, minimum de 90 % des lignes et de 80 % pour les instructions, branches, complexité, méthodes et classes. |
 | Backend avec MySQL | Même commande avec `YOGA_MYSQL_TEST_URL` configurée selon le README backend | Cinq intégrations supplémentaires, fixtures transactionnelles annulées, schéma existant seulement validé. |
 
 Les rapports de couverture Jest et E2E sont indépendants. Les DTO backend sont
@@ -63,6 +63,25 @@ Cypress distingue les écrans avec API simulée par `cy.intercept` du contrôle
 complémentaire sans interception contre Spring/MySQL. Pour ce dernier, voir les
 prérequis et la commande `CYPRESS_realApi=true npm run e2e:ci` dans le README
 frontend : le serveur instrumenté doit utiliser le proxy visant le vrai backend.
+
+## Lire les trois rapports de couverture
+
+Après chaque commande de test, ouvrir le fichier `index.html` de la suite
+correspondante dans un navigateur. Les chemins du tableau partent de la racine
+du dépôt. Pour transmettre un rapport, copier son dossier complet afin de
+conserver les feuilles de style et les pages détaillées.
+
+- **Jest et Cypress** affichent chacun leur synthèse **All files**. Lire les quatre
+  pourcentages séparément. **Statements** désigne les instructions exécutées,
+  **Branches** les issues de décision parcourues, **Functions** les fonctions
+  appelées et **Lines** les lignes exécutées. Cliquer sur un dossier puis sur un
+  fichier pour repérer les lignes en rouge ou les branches manquantes.
+- **JaCoCo** donne la synthèse sur la ligne **Total**. Les colonnes **Cov.**
+  indiquent les pourcentages des instructions et des branches. Pour les lignes,
+  méthodes, classes et la complexité, lire les colonnes **Missed** et le total
+  correspondant. Par exemple, 2 méthodes manquées sur 20 donnent 90 % de
+  couverture. Cliquer sur un package pour vérifier ses seuils, puis sur une
+  classe pour voir les lignes exécutées, partielles ou manquées.
 
 Les artefacts générés restent dans les dossiers ignorés `coverage/` et `target/`.
 Les conventions Git et les limites d’intervention sont dans
