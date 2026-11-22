@@ -38,14 +38,18 @@ cd P4-tester-ameliorez-application
 mise install java@21 maven@3.9.3
 ```
 
-**Terminal 1.** Démarrer Docker avec Compose sur la machine qui héberge le
-projet. Depuis la racine du clone, lancer Spring avec le fichier
-`backend/.env` fourni. Spring démarre MySQL via `compose.yaml` et écoute sur le port 8080.
+**Terminal 1.** Démarrer Docker sur la machine du clone. Depuis la racine,
+vérifier que le terminal peut accéder au moteur et au plugin Compose, puis lancer le backend.
 
 ```bash
 cd backend
-mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
+docker info > /dev/null && docker compose version && mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
 ```
+
+Spring utilise le fichier `.env` fourni, démarre MySQL avec Compose et découvre
+son port automatiquement. L’API écoute sur `http://localhost:8080`. Si Linux
+affiche `permission denied` sur `docker.sock` et que Docker fonctionne avec
+`sudo`, suivre la [procédure de démarrage avec sudo pour Docker](backend/README.md#si-docker-nécessite-sudo-sous-linux).
 
 **Terminal 2.** Depuis la racine du clone, utiliser Node 20.19.2 et npm pour
 installer les dépendances du lockfile et lancer Angular.

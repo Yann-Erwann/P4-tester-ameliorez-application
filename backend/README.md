@@ -221,42 +221,51 @@ l’expérience utilisateur conserve ces réserves. Aucun push, merge ou déploi
 n’est inclus dans cette validation.
 
 ## Démarrage du back
-Pour démarrer le back, il :
-- démarrer Docker avec Compose sur la machine qui héberge le projet.
-- lancer une console, se placer dans `backend/` et exécuter la commande Maven avec `mise` :
+
+Depuis `backend/`, avec Docker démarré et accessible au compte courant, exécuter
+
+```bash
+docker info > /dev/null && docker compose version && mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
 ```
-mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
+
+Spring Boot utilise `compose.yaml` et le fichier `.env` du clone pour démarrer
+MySQL et découvrir son port hôte. Le conteneur `back_mysql` utilise le volume
+`backend_db_data`. Hibernate initialise les tables au premier démarrage avec
+`ddl-auto: update`.
+
+### Si Docker nécessite sudo sous Linux
+
+Si `docker info` signale `permission denied` sur `docker.sock` et que
+`sudo docker info` fonctionne, exécuter ce bloc depuis `backend/` sur la
+machine qui héberge Docker. Seules les commandes Docker utilisent `sudo`.
+
+```bash
+sudo docker compose --env-file .env -f compose.yaml up -d --no-recreate mysql &&
+sudo docker compose --env-file .env -f compose.yaml exec -T mysql sh -c \
+  'MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin --protocol=tcp -h 127.0.0.1 -u "$MYSQL_USER" --wait=30 ping' &&
+mysql_endpoint=$(sudo docker compose --env-file .env -f compose.yaml port mysql 3306) &&
+DB_HOST=127.0.0.1 DB_PORT="${mysql_endpoint##*:}" SPRING_DOCKER_COMPOSE_ENABLED=false \
+  mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
 ```
-Cette commande va :
-- initialiser le container Docker qui contient la base de données
-- lancer l'application back et le connecter à la base de données précédemment créée
+
+Ce bloc attend MySQL puis transmet son port à Spring pour cette exécution.
+Le nom de la base et les identifiants viennent de `.env`. On peut rejouer le
+bloc depuis un nouveau terminal. Aucun fichier Maven local n’est nécessaire.
+
+Une fois Spring démarré, exécuter dans un second terminal
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/api/session
+```
+
+La réponse attendue est `401` pour cette route protégée appelée sans jeton.
 
 ### Si les ports habituels sont occupés
 
-Conserver les autres applications et volumes existants. Depuis la racine du
-dépôt, démarrer uniquement le MySQL de ce starter et relever son port hôte :
-
-```bash
-docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml config --quiet
-docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml up -d mysql
-docker compose --project-directory backend --env-file backend/.env -f backend/compose.yaml port mysql 3306
-```
-
-L’accès au socket peut nécessiter les droits Docker de votre environnement.
-Ne pas modifier ses permissions pour contourner un refus. Conserver le projet
-Compose `backend`, le conteneur `back_mysql` et le volume `backend_db_data`.
-
-Depuis `backend/`, lancer Spring sur un port libre, ici 8082. Dans cet exemple,
-remplacer **32768** par le port MySQL relevé, attribué dynamiquement :
-
-```bash
-mise exec java@21 maven@3.9.3 -- mvn -B spring-boot:run -Dspring-boot.run.arguments='--server.port=8082 --spring.docker.compose.enabled=false --spring.datasource.url=jdbc:mysql://127.0.0.1:32768/test'
-```
-
-L’intégration Compose de Spring est désactivée pour cette exécution parce que
-MySQL a déjà été lancé séparément. Les identifiants restent chargés depuis
-`backend/.env`. Examiner la cible avant de démarrer : la configuration Hibernate
-du starter utilise `ddl-auto: update`.
+Compose attribue un port hôte disponible à MySQL, même si le port 3306 est
+déjà occupé. Si le port HTTP 8080 est pris, exécuter `export SERVER_PORT=8082`
+dans le terminal du backend avant la procédure de démarrage choisie. Utiliser
+alors `http://localhost:8082` pour contrôler la réponse HTTP.
 
 Pour le frontend, le proxy doit viser le port choisi pour Spring. Sans modifier
 la configuration du starter, créer un fichier temporaire hors du dépôt, par
