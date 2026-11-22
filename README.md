@@ -16,6 +16,19 @@ Pour une lecture hors ligne, extraire le ZIP et ouvrir son fichier `index.html`.
 | JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-jacoco-v1.0.0.zip) |
 | Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-cypress-v1.0.0.zip) |
 
+### Nombre de tests réussis dans `v1.0.0`
+
+| Suite | Tests unitaires | Tests d’intégration | Tests de bout en bout (E2E) | Autres contrôles | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Jest · frontend | 22 | 47 | 0 | 0 | 69 |
+| JUnit · backend | 27 | 39 | 0 | 2 | 68 |
+| Cypress · navigateur | 0 | 0 | 11 | 0 | 11 |
+| **Total** | **49** | **86** | **11** | **2** | **148** |
+
+- **Jest** combine les composants et services Angular dans 47 tests d’intégration (68,12 %). Les appels HTTP y reçoivent des réponses simulées. Les 22 tests unitaires incluent le test de l’utilitaire de configuration de `TestBed`.
+- **JUnit** exécute 34 tests avec un contexte Spring et une base H2 en mémoire, et 5 avec MySQL, soit 39 intégrations (57,35 %). Les deux autres contrôles portent sur l’architecture avec ArchUnit et sur le gestionnaire d’exceptions avec un contrôleur de test et MockMvc.
+- **Cypress** exécute 10 parcours d’écran avec des réponses API simulées. Le onzième, **E-R01**, relie le navigateur Angular au serveur Spring et à MySQL pour tester la connexion, la consultation d’une séance et du compte, puis la déconnexion.
+
 ## Installer et lancer
 
 ```bash
@@ -65,10 +78,8 @@ hors du périmètre demandé et exclus de JaCoCo, le code généré Lombok est m
 et filtré, le code métier écrit à la main reste mesuré. Les commandes échouent
 si un test échoue ou si un indicateur mesuré descend sous son seuil.
 
-Les READMEs détaillés relient les scénarios à la grille d’évaluation fournie et
-expliquent le comptage réel des tests d’intégration. Résultats de référence :
-Jest **69 tests, dont 47 intégrations (68,12 %)** backend avec MySQL **68 tests,
-dont 39 intégrations (57,35 %)**. Le minimum demandé est 30 % pour chaque suite.
+La grille d’évaluation demande au moins 30 % de tests d’intégration dans chacune
+des suites Jest et JUnit. Les README frontend et backend détaillent les scénarios.
 
 Pour inclure **E-R01** dans le rapport Cypress, démarrer Spring avec MySQL
 et vérifier qu’un compte administrateur et au moins une séance associée à un
