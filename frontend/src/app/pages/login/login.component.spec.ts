@@ -48,8 +48,10 @@ describe('[integration] J-I02 LoginComponent', () => {
 
   it('should open the sessions after a successful login', () => {
     const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    const credentials = { email: 'audit@example.invalid', password: 'Secret!123' };
+    const credentials = { email: 'audit@example.invalid', password: ' 2 ' };
     component.form.setValue(credentials);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button[type="submit"]').disabled).toBe(false);
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 
     const request = http.expectOne('/api/auth/login');
@@ -68,6 +70,22 @@ describe('[integration] J-I02 LoginComponent', () => {
 
     expect(TestBed.inject(SessionService).sessionInformation).toEqual(identity);
     expect(navigate).toHaveBeenCalledWith(['/sessions']);
+  });
+
+  it('blocks empty or blank passwords and enables login for a one-character password', () => {
+    component.form.controls.email.setValue('audit@example.invalid');
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('[formControlName="password"]');
+    const submit: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    for (const value of ['', '   ', '2']) {
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(submit.disabled).toBe(value !== '2');
+      if (submit.disabled) {
+        fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
+        http.expectNone('/api/auth/login');
+      }
+    }
   });
 
   it('should show an error when login is refused', () => {

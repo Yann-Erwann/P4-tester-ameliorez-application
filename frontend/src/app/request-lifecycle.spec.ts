@@ -57,6 +57,7 @@ describe('[unit] J-U02 Component request lifetime', () => {
   it('cancels login on departure without logging in or navigating', async () => {
     const fixture = await createComponent(LoginComponent);
     TestBed.inject(SessionService).logOut();
+    fixture.componentInstance.form.setValue({ email: 'yoga@example.invalid', password: 'Secret!123' });
     fixture.componentInstance.submit();
     expectCancelled(fixture, '/api/auth/login');
     expect(TestBed.inject(SessionService).isLogged).toBe(false);

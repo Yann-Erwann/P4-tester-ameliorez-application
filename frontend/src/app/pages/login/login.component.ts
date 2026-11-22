@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, Validators } from '@angular/forms';
+import { nonBlankText } from '../../shared/non-blank-text.validator';
 import { Router } from '@angular/router';
 import { SessionInformation } from 'src/app/core/models/sessionInformation.interface';
 import { SessionService } from 'src/app/core/service/session.service';
@@ -36,12 +37,16 @@ export class LoginComponent {
       '',
       [
         Validators.required,
-        Validators.min(3)
+        nonBlankText
       ]
     ]
   });
 
   public submit(): void {
+    if (this.form.invalid) {
+      return;
+    }
+
     const loginRequest = this.form.value as LoginRequest;
     this.authService.login(loginRequest)
       .pipe(takeUntilDestroyed(this.destroyRef))
