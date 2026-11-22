@@ -35,7 +35,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl identity = (UserDetailsImpl) authentication.getPrincipal();
-        boolean admin = userRepository.findByEmail(identity.getUsername()).map(User::isAdmin).orElse(false);
+        boolean admin = userRepository.findByEmail(identity.getUsername()).map(user -> user.isAdmin()).orElse(false);
         return new JwtResponse(jwtUtils.generateJwtToken(authentication), identity.getId(),
                 identity.getUsername(), identity.getFirstName(), identity.getLastName(), admin);
     }

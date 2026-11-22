@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.util.*;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +23,7 @@ class SessionServiceTest {
     @Test void updatesOnlyEditableFieldsAndPreservesMembersAndIdentity() {
         session.getUsers().add(member);
         when(sessions.findById(1L)).thenReturn(Optional.of(session));
-        when(sessions.save(session)).thenReturn(session);
+        when(sessions.save(requireNonNull(session))).thenReturn(session);
         var changes = Session.builder().id(999L).name("Updated").description("Practice").date(new Date())
                 .teacher(Teacher.builder().id(8L).build()).users(List.of()).build();
         assertThat(service.update(1L, changes)).isSameAs(session);
@@ -30,10 +31,12 @@ class SessionServiceTest {
         assertThat(session.getId()).isEqualTo(1L);
         assertThat(session.getName()).isEqualTo("Updated");
     }
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @Test void refusesUpdatingAnAbsentSessionWithoutWriting() {
         assertThatThrownBy(() -> service.update(1L, session)).isInstanceOf(NotFoundException.class);
         verify(sessions, never()).save(any());
     }
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @ParameterizedTest @ValueSource(booleans = {false, true})
     void participationRequiresBothAnAccountAndASession(boolean missingAccount) {
         if (missingAccount) when(sessions.findById(1L)).thenReturn(Optional.of(session));
@@ -47,7 +50,7 @@ class SessionServiceTest {
         service.participate(1L, 7L);
         assertThat(session.getUsers()).containsExactly(member);
         assertThatThrownBy(() -> service.participate(1L, 7L)).isInstanceOf(BadRequestException.class);
-        verify(sessions, times(1)).save(session);
+        verify(sessions, times(1)).save(requireNonNull(session));
     }
     @Test void removingAMemberPreservesOtherMembers() {
         User other = new User("other@example.invalid", "Last", "Other", "encoded", false).setId(8L);

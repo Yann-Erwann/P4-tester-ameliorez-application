@@ -12,10 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class ServiceResponsibilitiesTest {
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @Test
     void sessionDeletionRequiresAnExistingSessionWithoutControllerChecks() {
         SessionRepository sessions = mock(SessionRepository.class);
@@ -26,9 +28,10 @@ class ServiceResponsibilitiesTest {
         Session existing = Session.builder().id(7L).build();
         when(sessions.findById(7L)).thenReturn(Optional.of(existing));
         service.delete(7L);
-        verify(sessions).delete(existing);
+        verify(sessions).delete(requireNonNull(existing));
     }
 
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @Test
     void accountDeletionEnforcesExistenceAndOwnershipInsideTheService() {
         UserRepository users = mock(UserRepository.class);

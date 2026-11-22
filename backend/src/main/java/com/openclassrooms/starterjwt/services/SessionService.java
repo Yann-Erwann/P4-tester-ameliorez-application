@@ -7,6 +7,7 @@ import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.repository.SessionRepository;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +41,10 @@ public class SessionService {
         return this.sessionRepository.findAll();
     }
 
+    @NonNull
     public Session getById(Long id) {
-        return this.sessionRepository.findById(Objects.requireNonNull(id)).orElseThrow(NotFoundException::new);
+        return Objects.requireNonNull(this.sessionRepository.findById(Objects.requireNonNull(id))
+                .orElseThrow(NotFoundException::new));
     }
 
     @Transactional

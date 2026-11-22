@@ -39,6 +39,7 @@ class AuthServiceTest {
         request.setLastName("Last"); request.setPassword("Secret!123"); return request;
     }
 
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @Test void registersANonAdminWithAnEncodedPassword() {
         SignupRequest request = signup();
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded-test-password");
@@ -51,6 +52,7 @@ class AuthServiceTest {
         assertThat(user.getLastName()).isEqualTo("Last");
     }
 
+    @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @Test void refusesDuplicateEmailWithoutEncodingOrWriting() {
         when(users.existsByEmail(signup().getEmail())).thenReturn(true);
         assertThat(service.register(signup())).isFalse();
