@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
 
 @Tag("integration")
@@ -50,10 +51,10 @@ class MySqlPersistenceTest {
     }
 
     Session newSession(List<User> participants) {
-        Teacher teacher = teachers.save(Teacher.builder().firstName("Delivery").lastName("Validation").build());
-        return sessions.saveAndFlush(Session.builder().name("Delivery validation").date(new Date())
+        Teacher teacher = teachers.save(requireNonNull(Teacher.builder().firstName("Delivery").lastName("Validation").build()));
+        return sessions.saveAndFlush(requireNonNull(Session.builder().name("Delivery validation").date(new Date())
                 .description("Temporary fixture rolled back after test").teacher(teacher)
-                .users(new ArrayList<>(participants)).build());
+                .users(new ArrayList<>(participants)).build()));
     }
 
     @Test
@@ -65,12 +66,12 @@ class MySqlPersistenceTest {
         userService.delete(removed.getId(), removed.getEmail());
         users.flush();
         entityManager.clear();
-        assertThat(users.findById(removed.getId())).isEmpty();
-        assertThat(users.findById(retained.getId())).isPresent();
-        assertThat(sessions.findById(first.getId()).orElseThrow().getUsers())
-                .extracting(User::getId).containsExactly(retained.getId());
-        assertThat(sessions.findById(second.getId()).orElseThrow().getUsers()).isEmpty();
-        assertThat(teachers.findById(first.getTeacher().getId())).isPresent();
+        assertThat(users.findById(requireNonNull(removed.getId()))).isEmpty();
+        assertThat(users.findById(requireNonNull(retained.getId()))).isPresent();
+        assertThat(sessions.findById(requireNonNull(first.getId())).orElseThrow().getUsers())
+                .extracting(user -> user.getId()).containsExactly(retained.getId());
+        assertThat(sessions.findById(requireNonNull(second.getId())).orElseThrow().getUsers()).isEmpty();
+        assertThat(teachers.findById(requireNonNull(first.getTeacher().getId()))).isPresent();
     }
 
     @Test
@@ -79,14 +80,14 @@ class MySqlPersistenceTest {
         User participant = newMember();
         Session original = newSession(List.of(participant));
         entityManager.clear();
-        var createdAt = sessions.findById(original.getId()).orElseThrow().getCreatedAt();
+        var createdAt = sessions.findById(requireNonNull(original.getId())).orElseThrow().getCreatedAt();
         Session changes = Session.builder().name("Updated delivery session").date(new Date())
                 .description("x".repeat(2500)).teacher(original.getTeacher()).build();
         sessionService.update(original.getId(), changes);
         sessions.flush();
         entityManager.clear();
-        Session reloaded = sessions.findById(original.getId()).orElseThrow();
-        assertThat(reloaded.getUsers()).extracting(User::getId).containsExactly(participant.getId());
+        Session reloaded = sessions.findById(requireNonNull(original.getId())).orElseThrow();
+        assertThat(reloaded.getUsers()).extracting(user -> user.getId()).containsExactly(participant.getId());
         assertThat(reloaded.getCreatedAt()).isEqualTo(createdAt);
         assertThat(reloaded.getDescription()).hasSize(2500);
     }
@@ -108,7 +109,7 @@ class MySqlPersistenceTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM sessions WHERE teacher_id = ?", Long.class,
                 original.getTeacher().getId())).isEqualTo(1L);
-        assertThat(sessions.findById(original.getId())).isPresent();
+        assertThat(sessions.findById(requireNonNull(original.getId()))).isPresent();
     }
 
     @Test
