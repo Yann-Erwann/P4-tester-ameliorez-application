@@ -19,7 +19,9 @@ describe('E-S01 screen journeys with controlled API responses', () => {
     cy.intercept('POST', '**/api/auth/register', { message: 'User registered successfully!' }).as('register');
     cy.intercept('GET', '**/api/teacher', [teacher]).as('teachers');
     cy.intercept('GET', '**/api/teacher/*', teacher).as('teacher');
-    cy.intercept('GET', '**/api/session', request => request.reply(sessions)).as('sessions');
+    cy.intercept({ method: 'GET', pathname: '/api/session', query: { view: 'summary' } }, request => {
+      request.reply(sessions.map(({ id, name, date, description }) => ({ id, name, date, description })));
+    }).as('sessions');
     cy.intercept('GET', /\/api\/session\/\d+$/, request => request.reply(sessions.find(s => s.id === Number(request.url.split('/').pop())) || {})).as('detail');
     cy.intercept('GET', '**/api/user/*', request => request.reply({ ...member, email: member.username, admin })).as('account');
     cy.intercept('DELETE', '**/api/user/*', { statusCode: 200, body: '' }).as('deleteAccount');

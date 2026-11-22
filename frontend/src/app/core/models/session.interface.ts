@@ -8,3 +8,10 @@ export interface Session {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface SessionSummary {
+  id: number;
+  name: string;
+  date: string;
+  description: string;
+}

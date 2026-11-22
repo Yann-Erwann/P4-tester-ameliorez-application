@@ -8,7 +8,7 @@ import { SessionService } from 'src/app/core/service/session.service';
 
 import { ListComponent } from './list.component';
 import { BehaviorSubject, of } from 'rxjs';
-import { Session } from '../../../../core/models/session.interface';
+import { SessionSummary } from '../../../../core/models/session.interface';
 import { SessionApiService } from '../../../../core/service/session-api.service';
 
 describe('[integration] J-I02 ListComponent', () => {
@@ -42,13 +42,11 @@ describe('[integration] J-I02 ListComponent', () => {
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
-    http.expectOne('api/session').flush([{
+    http.expectOne('api/session?view=summary').flush([{
       id: 1,
       name: 'Baseline yoga',
       description: 'Baseline session',
       date: '2026-12-01',
-      teacher_id: 7,
-      users: [],
     }]);
     fixture.detectChanges();
   });
@@ -78,7 +76,7 @@ describe('[integration] J-I02 ListComponent', () => {
   });
 
   it('keeps cards attached to their IDs when sessions are refreshed, reordered and removed', () => {
-    const first: Session = { id: 1, name: 'First', description: 'Practice', date: new Date('2026-12-01'), teacher_id: 7, users: [] };
+    const first: SessionSummary = { id: 1, name: 'First', description: 'Practice', date: '2026-12-01' };
     const second = { ...first, id: 2, name: 'Second' };
     const sessions = new BehaviorSubject([first, second]);
     component.sessions$ = sessions.asObservable();
@@ -98,9 +96,9 @@ describe('[integration] J-I02 ListComponent', () => {
   });
 
   it('cancels the async session request when leaving the list', () => {
-    component.sessions$ = TestBed.inject(SessionApiService).all();
+    component.sessions$ = TestBed.inject(SessionApiService).summaries();
     fixture.detectChanges();
-    const request = http.expectOne('api/session');
+    const request = http.expectOne('api/session?view=summary');
     fixture.destroy();
     expect(request.cancelled).toBe(true);
   });

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Session } from '../models/session.interface';
+import { Session, SessionSummary } from '../models/session.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +14,10 @@ export class SessionApiService {
 
   public all(): Observable<Session[]> {
     return this.httpClient.get<Session[]>(this.pathService);
+  }
+
+  public summaries(): Observable<SessionSummary[]> {
+    return this.httpClient.get<SessionSummary[]>(this.pathService, { params: { view: 'summary' } });
   }
 
   public detail(id: string): Observable<Session> {
