@@ -104,7 +104,7 @@ describe('[integration] J-I02 DetailComponent', () => {
     expect(participate.request.method).toBe('POST');
     participate.flush(null);
     http.expectOne('api/session/1').flush({ ...component.session!, users: [1] });
-    http.expectOne('api/teacher/7').flush({ id: 7, firstName: 'Audit', lastName: 'Teacher' });
+    http.expectNone('api/teacher/7');
     fixture.detectChanges();
     expect(element.textContent).toContain('Do not participate');
     expect(element.textContent).toContain('1 attendees');
@@ -114,11 +114,28 @@ describe('[integration] J-I02 DetailComponent', () => {
     expect(unParticipate.request.method).toBe('DELETE');
     unParticipate.flush(null);
     http.expectOne('api/session/1').flush({ ...component.session!, users: [] });
-    http.expectOne('api/teacher/7').flush({ id: 7, firstName: 'Audit', lastName: 'Teacher' });
+    http.expectNone('api/teacher/7');
     fixture.detectChanges();
     expect(element.textContent).not.toContain('Do not participate');
     expect(element.textContent).toContain('0 attendees');
     expect(element.querySelector('button[color="primary"]')).not.toBeNull();
   });
+  it('replaces a pending teacher lookup when the refreshed session changes teacher', () => {
+    component.participate();
+    http.expectOne('api/session/1/participate/1').flush(null);
+    http.expectOne('api/session/1').flush({ ...component.session!, teacher_id: 8, users: [1] });
+    const previous = http.expectOne('api/teacher/8');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Audit TEACHER');
+
+    component.unParticipate();
+    http.expectOne('api/session/1/participate/1').flush(null);
+    http.expectOne('api/session/1').flush({ ...component.session!, teacher_id: 9, users: [] });
+    expect(previous.cancelled).toBe(true);
+    http.expectOne('api/teacher/9').flush({ id: 9, firstName: 'New', lastName: 'Teacher' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('New TEACHER');
+  });
+
 });
 

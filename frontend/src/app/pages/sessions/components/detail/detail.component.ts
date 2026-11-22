@@ -1,6 +1,6 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, ErrorHandler, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder } from '@angular/forms';
+import { EMPTY, Subject, catchError, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Teacher } from '../../../../core/models/teacher.interface';
@@ -27,7 +27,9 @@ export class DetailComponent implements OnInit {
 
   private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
-  private fb = inject(FormBuilder);
+  private refresh = new Subject<void>();
+  private requestedTeacherId?: number;
+  private errorHandler = inject(ErrorHandler);
   private sessionService = inject(SessionService);
   private sessionApiService = inject(SessionApiService);
   private teacherService = inject(TeacherService);
@@ -41,7 +43,33 @@ export class DetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchSession();
+    this.refresh.pipe(
+      startWith(undefined),
+      switchMap(() => this.sessionApiService.detail(this.sessionId).pipe(
+        catchError(error => {
+          this.errorHandler.handleError(error);
+          return EMPTY;
+        }),
+      )),
+      tap(session => {
+        this.session = session;
+        this.isParticipate = session.users.includes(Number(this.userId));
+      }),
+      map(session => session.teacher_id),
+      filter(id => id !== this.requestedTeacherId),
+      switchMap(id => {
+        this.requestedTeacherId = id;
+        this.teacher = undefined;
+        return this.teacherService.detail(String(id)).pipe(
+          catchError(error => {
+            this.requestedTeacherId = undefined;
+            this.errorHandler.handleError(error);
+            return EMPTY;
+          }),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(teacher => this.teacher = teacher);
   }
 
   public back(): void {
@@ -62,27 +90,13 @@ export class DetailComponent implements OnInit {
   public participate(): void {
     this.sessionApiService.participate(this.sessionId, this.userId)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(_ => this.fetchSession());
+      .subscribe(() => this.refresh.next());
   }
 
   public unParticipate(): void {
     this.sessionApiService.unParticipate(this.sessionId, this.userId)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(_ => this.fetchSession());
-  }
-
-  private fetchSession(): void {
-    this.sessionApiService
-      .detail(this.sessionId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((session: Session) => {
-        this.session = session;
-        this.isParticipate = session.users.some(u => u === this.sessionService.sessionInformation!.id);
-        this.teacherService
-          .detail(session.teacher_id.toString())
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((teacher: Teacher) => this.teacher = teacher);
-      });
+      .subscribe(() => this.refresh.next());
   }
 
 }
