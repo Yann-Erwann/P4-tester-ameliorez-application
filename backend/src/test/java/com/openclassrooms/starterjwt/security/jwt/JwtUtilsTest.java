@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtUtilsTest {
@@ -21,8 +22,8 @@ class JwtUtilsTest {
 
     @BeforeEach
     void configureTestKey() {
-        ReflectionTestUtils.setField(jwt, "jwtSecret", Base64.getEncoder().encodeToString(keyBytes));
-        ReflectionTestUtils.setField(jwt, "jwtExpirationMs", 60_000);
+        ReflectionTestUtils.setField(requireNonNull(jwt), "jwtSecret", Base64.getEncoder().encodeToString(keyBytes));
+        ReflectionTestUtils.setField(requireNonNull(jwt), "jwtExpirationMs", 60_000);
     }
 
     @Test
@@ -54,7 +55,7 @@ class JwtUtilsTest {
         assertThat(first.equals(sameId)).isTrue();
         assertThat(first.equals(other)).isFalse();
         assertThat(first.equals(null)).isFalse();
-        assertThat(first.equals("user")).isFalse();
+        assertThat(first.equals((Object) "user")).isFalse();
         assertThat(first.isEnabled()).isTrue();
         assertThat(first.isAccountNonExpired()).isTrue();
         assertThat(first.isAccountNonLocked()).isTrue();

@@ -43,7 +43,7 @@ class SensitiveLoggingTest {
         logger.addAppender(captured);
         try {
             new SessionController(service, mapper).create(dto);
-            assertThat(captured.list).extracting(ILoggingEvent::getFormattedMessage)
+            assertThat(captured.list).extracting(event -> event.getFormattedMessage())
                     .containsExactly("Created session 7")
                     .allSatisfy(message -> assertThat(message).doesNotContain(
                             "synthetic-sensitive-hash", "private@example.invalid", "private-session-description"));
