@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/user/{id}")
 public class UserController {
     private final UserMapper userMapper;
     private final UserService userService;
@@ -24,14 +24,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
     public ResponseEntity<?> findById(@PathVariable("id") String id) {
         User user = this.userService.getRequiredById(Long.valueOf(id));
 
         return ResponseEntity.ok().body(this.userMapper.toDto(user));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping
     public ResponseEntity<Void> delete(@PathVariable("id") String id,
                                        @AuthenticationPrincipal UserDetails identity) {
         this.userService.delete(Long.parseLong(id), identity.getUsername());
