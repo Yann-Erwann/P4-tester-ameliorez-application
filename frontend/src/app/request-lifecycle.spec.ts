@@ -65,6 +65,7 @@ describe('[unit] J-U02 Component request lifetime', () => {
 
   it('cancels registration on departure without navigating', async () => {
     const fixture = await createComponent(RegisterComponent);
+    fixture.componentInstance.form.setValue({ email: 'yoga@example.invalid', firstName: 'Test', lastName: 'Yoga', password: 'Secret!123' });
     fixture.componentInstance.submit();
     expectCancelled(fixture, '/api/auth/register');
     expect(fixture.componentInstance.onError).toBe(false);

@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, Validators } from '@angular/forms';
+import { nonBlankText } from '../../shared/non-blank-text.validator';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/service/auth.service';
 import { RegisterRequest } from '../../core/models/registerRequest.interface';
@@ -30,30 +31,37 @@ export class RegisterComponent {
       '',
       [
         Validators.required,
-        Validators.min(3),
-        Validators.max(20)
+        nonBlankText,
+        Validators.minLength(3),
+        Validators.maxLength(20)
       ]
     ],
     lastName: [
       '',
       [
         Validators.required,
-        Validators.min(3),
-        Validators.max(20)
+        nonBlankText,
+        Validators.minLength(3),
+        Validators.maxLength(20)
       ]
     ],
     password: [
       '',
       [
         Validators.required,
-        Validators.min(3),
-        Validators.max(40)
+        nonBlankText,
+        Validators.minLength(6),
+        Validators.maxLength(40)
       ]
     ]
   });
 
 
   public submit(): void {
+    if (this.form.invalid) {
+      return;
+    }
+
     const registerRequest = this.form.value as RegisterRequest;
     this.authService.register(registerRequest)
       .pipe(takeUntilDestroyed(this.destroyRef))

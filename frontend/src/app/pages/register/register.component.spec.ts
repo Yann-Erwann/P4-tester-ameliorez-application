@@ -1,6 +1,6 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,6 +44,29 @@ describe('[integration] J-I02 RegisterComponent', () => {
     expect(fixture.nativeElement.querySelector('.error')).toBeNull();
   });
 
+  it.each([
+    ['firstName', 3, 20],
+    ['lastName', 3, 20],
+    ['password', 6, 40],
+  ] as const)('checks the length of %s before sending a registration', (field, min, max) => {
+    component.form.setValue({ email: 'yoga@example.invalid', firstName: 'Alice', lastName: 'Jones', password: 'Secret!123' });
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(`[formControlName="${field}"]`);
+    const submit: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    for (const [value, valid] of [
+      ['', false], [' '.repeat(min), false], ['a'.repeat(min - 1), false],
+      ['9'.repeat(min), true], ['a'.repeat(max), true], ['a'.repeat(max + 1), false],
+    ] as const) {
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(submit.disabled).toBe(!valid);
+      if (!valid) {
+        fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
+        http.expectNone('/api/auth/register');
+      }
+    }
+  });
+
   it('submits registration and opens login on success', () => {
     const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const registration = { email: 'test@example.invalid', firstName: 'Test', lastName: 'Yoga', password: 'Secret!123' };
@@ -60,6 +83,7 @@ describe('[integration] J-I02 RegisterComponent', () => {
 
   it('shows the error branch when registration fails', () => {
     const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.form.setValue({ email: 'taken@example.invalid', firstName: 'Test', lastName: 'Yoga', password: 'Secret!123' });
     component.submit();
     http.expectOne('/api/auth/register').flush({}, { status: 400, statusText: 'Bad Request' });
     fixture.detectChanges();
