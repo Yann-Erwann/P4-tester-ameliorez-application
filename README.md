@@ -7,14 +7,14 @@ locaux existants.
 
 ## Rapports de couverture
 
-Les rapports HTML de la version `v0.0.2` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
+Les rapports HTML de la version `v1.0.0` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
 Pour une lecture hors ligne, extraire le ZIP et ouvrir son fichier `index.html`.
 
 | Rapport | Consultation | Téléchargement |
 | --- | --- | --- |
-| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jest-v0.0.2.zip) |
-| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jacoco-v0.0.2.zip) |
-| Cypress — parcours d’écran | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-cypress-v0.0.2.zip) |
+| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-jest-v1.0.0.zip) |
+| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-jacoco-v1.0.0.zip) |
+| Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-cypress-v1.0.0.zip) |
 
 ## Installer et lancer
 
@@ -82,7 +82,8 @@ npm run e2e:serve -- --proxy-config proxy.conf.json
 CYPRESS_realApi=true npm run e2e:ci
 ```
 
-Le résultat attendu est de **11 tests réussis**, dont un dans `real-api.cy.ts`.
+Le rapport Cypress de `v1.0.0` couvre **11 tests**, dont E-R01 dans `real-api.cy.ts`.
+La commande sans `CYPRESS_realApi=true` exécute les 10 parcours avec API simulée.
 Si Spring utilise un autre port, adapter la cible du proxy en suivant le
 [README frontend](frontend/README.md#contrôle-complémentaire-avec-springmysql-réels).
 

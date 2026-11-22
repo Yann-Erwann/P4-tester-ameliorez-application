@@ -100,9 +100,9 @@ compte 34 intégrations sur 63 tests exécutés (53,97 %). MySQL ajoute cinq cas
 d’intégration quand sa variable est renseignée. Les fichiers XML permettent de
 recalculer ce ratio après chaque évolution, le minimum demandé est 30 %.
 La vérification complète avec MySQL a passé **68 tests, dont 39 intégrations
-(57,35 %)**, sans échec ni test ignoré. Les couvertures globales mesurées sont :
-98,58 % instructions, 95,24 % branches, 98,29 % lignes, 96 % complexité,
-98,15 % méthodes et 100 % classes. Les seuils sont contrôlés par package,
+(57,35 %)**, sans échec ni test ignoré. Pour `v1.0.0`, JaCoCo mesure
+98,61 % des instructions, 95,24 % des branches, 98,35 % des lignes, 96,08 % de la complexité,
+98,20 % des méthodes et 100 % des classes. Les seuils sont contrôlés par package,
 les rapports XML/HTML précisent les dénominateurs et le périmètre exclu.
 
 La grille d’évaluation fournie couvre tests unitaires/intégration, proportion,
