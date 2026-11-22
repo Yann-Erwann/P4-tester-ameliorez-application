@@ -8,20 +8,29 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   jest:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20.20.2
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
+      - run: npm ci --ignore-scripts
+      - name: Check production dependencies for critical advisories
+        run: npm audit --omit=dev --audit-level=critical
       - run: npm run test:coverage
 
   backend-and-browser:
@@ -29,14 +38,14 @@ jobs:
     timeout-minutes: 25
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:24989179f58856db763f418010c1169fecc944e3ec1ea7e921572d83eb070f70
         env:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: yoga_ci
           MYSQL_USER: yoga_ci
           MYSQL_PASSWORD: yoga_ci_test
         ports:
-          - 3306:3306
+          - "127.0.0.1:3306:3306"
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1"
           --health-interval=5s --health-timeout=5s --health-retries=30
@@ -46,12 +55,18 @@ jobs:
       YOGA_MYSQL_TEST_URL: jdbc:mysql://127.0.0.1:3306/yoga_ci
       YOGA_MYSQL_CONCURRENCY_TESTS: "true"
     steps:
-      - uses: actions/checkout@v6
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
         with:
           install: false
+          cache: false
+          version: 2026.10.8
+          sha256: c72477ae6c3a8e7d817a322f43da70e4643e75ee5c21265f1c19c894273b7428
+          github_token: ''
       - run: mise install java@21 maven@3.9.3
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20.20.2
           cache: npm
@@ -88,7 +103,8 @@ jobs:
         env:
           CYPRESS_realApi: "true"
         run: |
-          npm ci
+          npm ci --ignore-scripts
+          ./node_modules/.bin/cypress install
           npm run e2e:serve -- --proxy-config proxy.conf.json > "$RUNNER_TEMP/yoga-angular.log" 2>&1 &
           for attempt in {1..90}; do
             status=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4203/api/session || true)
