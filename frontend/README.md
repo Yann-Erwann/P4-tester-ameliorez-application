@@ -44,8 +44,8 @@ Rapports produits dans `coverage/jest/` : `index.html`, `lcov.info`,
 | `[integration]` J-I01/J-I03 | Services réels, configuration HttpClient et intercepteur JWT réels, avec HttpTestingController uniquement à la frontière réseau. Méthodes, chemins, corps, jeton et propagation des erreurs. |
 | `[integration]` J-I02 | Composant + vrai template + formulaires/routeur/services Angular, requêtes contrôlées par HttpTestingController, sans serveur Spring. Conditions, listes, actions, navigation et erreurs déjà gérées par l’application. |
 
-Les cas paramétrés comptent individuellement. La dernière suite comporte
-**69 tests réussis, dont 47 intégrations (68,12 %)**, au-dessus des 30 % demandés.
+Les cas paramétrés comptent individuellement. La suite de cette branche comporte
+**71 tests réussis, dont 49 intégrations Angular (69,01 %) et 22 tests unitaires**, au-dessus des 30 % demandés.
 Après chaque évolution, recalculer le ratio depuis le rapport réellement exécuté :
 
 ```bash
@@ -97,7 +97,7 @@ utilise le vrai navigateur et les vrais composants/services Angular, avec
 | E-04 | Garde des routes privées et écran introuvable. |
 | E-05 / E-06 | Liste/détail membre, participation/retrait et liste vide/déconnexion. |
 | E-07 / E-08 | Création, édition, suppression admin et retour sans sauvegarde. |
-| E-09 / E-10 | Compte administrateur, retour et suppression du compte membre. |
+| E-09 / E-10 | Compte administrateur, retour et suppression du compte membre avec vérification de son identifiant. |
 
 Rapports E2E : `coverage/e2e/index.html`, `lcov.info`, `coverage-summary.json`,
 rapports JUnit dans `coverage/e2e/results/` et captures d’échec dans
@@ -142,14 +142,20 @@ contrôleurs/services Spring et MySQL. Ce contrôle n’insère ni ne supprime d
 données. La suite complète a passé **11 tests sans échec ni test ignoré**.
 La couverture E2E reste indépendante de celle de Jest. Chaque `cypress run`
 nettoie ses données de couverture brutes et ses résultats JUnit avant la collecte.
-Les dernières mesures E2E sont : 98,21 % instructions, 94,54 % branches,
+Les mesures E2E publiées pour `v1.0.0` sont 98,21 % instructions, 94,54 % branches,
 100 % fonctions et 98,19 % lignes.
 
-## Comportements applicatifs conservés
+## Comportements vérifiés
 
-Cette partie modifie les tests, leur configuration et la documentation. Les
-validateurs de longueur d’origine, l’affichage du mot de passe d’inscription,
-la redirection existante de la garde invitée et la gestion limitée des erreurs
-des formulaires de séance ne sont pas corrigés silencieusement par les tests.
+La liste demande `GET /api/session?view=summary` pour afficher le nom, la date et
+la description de chaque séance et ouvrir sa fiche par identifiant. Après une
+inscription ou un retrait, la fiche actualise les participants. Elle recharge
+le professeur uniquement si son identifiant change ou si sa lecture a échoué.
+
+Un membre connecté qui ouvre une route de connexion ou d’inscription est redirigé
+vers `/sessions`. Le champ de mot de passe d’inscription masque la saisie.
+Si la création ou la modification d’une séance reçoit une réponse HTTP 409,
+le formulaire affiche le conflit et conserve les valeurs pour un nouvel essai.
+
 Le build production a un avertissement de taille initiale, distinct de la
 couverture et du résultat de `ng serve`.
