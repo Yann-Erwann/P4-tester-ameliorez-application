@@ -5,6 +5,15 @@ Le backend utilise Java 21, Maven 3.9.3 et MySQL. Les outils Java sont sélectio
 avec `mise`, le frontend utilise Node 20 et npm. Conserver les données et volumes
 locaux existants.
 
+## Rapports de couverture
+
+Les rapports HTML de la version `v0.0.2` sont disponibles au format ZIP.
+Extraire chaque archive, puis ouvrir son fichier `index.html`.
+
+- [Jest — tests frontend](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jest-v0.0.2.zip)
+- [JaCoCo — tests backend](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jacoco-v0.0.2.zip)
+- [Cypress — parcours d’écran](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-cypress-v0.0.2.zip)
+
 ## Installer et lancer
 
 ```bash
