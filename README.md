@@ -7,26 +7,26 @@ locaux existants.
 
 ## Rapports de couverture
 
-Les rapports HTML de la version `v1.0.0` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
+Les rapports HTML de la version `v1.1.0` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
 Pour une lecture hors ligne, extraire le ZIP et ouvrir son fichier `index.html`.
 
 | Rapport | Consultation | Téléchargement |
 | --- | --- | --- |
-| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-jest-v1.0.0.zip) |
-| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-jacoco-v1.0.0.zip) |
-| Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.0.0/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.0.0/coverage-cypress-v1.0.0.zip) |
+| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-jest-v1.1.0.zip) |
+| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-jacoco-v1.1.0.zip) |
+| Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-cypress-v1.1.0.zip) |
 
-### Nombre de tests réussis dans `v1.0.0`
+### Nombre de tests réussis dans `v1.1.0`
 
 | Suite | Tests unitaires | Tests d’intégration | Tests de bout en bout (E2E) | Autres contrôles | Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Jest · frontend | 22 | 47 | 0 | 0 | 69 |
-| JUnit · backend | 27 | 39 | 0 | 2 | 68 |
+| Jest · frontend | 22 | 49 | 0 | 0 | 71 |
+| JUnit · backend | 27 | 44 | 0 | 2 | 73 |
 | Cypress · navigateur | 0 | 0 | 11 | 0 | 11 |
-| **Total** | **49** | **86** | **11** | **2** | **148** |
+| **Total** | **49** | **93** | **11** | **2** | **155** |
 
-- **Jest** combine les composants et services Angular dans 47 tests d’intégration (68,12 %). Les appels HTTP y reçoivent des réponses simulées. Les 22 tests unitaires incluent le test de l’utilitaire de configuration de `TestBed`.
-- **JUnit** exécute 34 tests avec un contexte Spring et une base H2 en mémoire, et 5 avec MySQL, soit 39 intégrations (57,35 %). Les deux autres contrôles portent sur l’architecture avec ArchUnit et sur le gestionnaire d’exceptions avec un contrôleur de test et MockMvc.
+- **Jest** combine les composants et services Angular dans 49 tests d’intégration (69,01 %). Les appels HTTP y reçoivent des réponses simulées. Les 22 tests unitaires incluent le test de l’utilitaire de configuration de `TestBed`.
+- **JUnit** exécute 37 tests avec un contexte Spring et une base H2 en mémoire, et 7 avec MySQL, soit 44 intégrations (60,27 %). Les deux autres contrôles portent sur l’architecture avec ArchUnit et sur le gestionnaire d’exceptions avec un contrôleur de test et MockMvc.
 - **Cypress** exécute 10 parcours d’écran avec des réponses API simulées. Le onzième, **E-R01**, relie le navigateur Angular au serveur Spring et à MySQL pour tester la connexion, la consultation d’une séance et du compte, puis la déconnexion.
 
 ## Installer et lancer
@@ -71,7 +71,7 @@ Les deux services doivent être prêts pour les parcours contre l’API réelle.
 | Frontend Jest | Dans `frontend/`, exécuter `npm run test:coverage` | `frontend/coverage/jest/index.html`, JSON et LCOV. Minimum de 80 % pour les instructions, branches, fonctions et lignes. |
 | Frontend Cypress | Dans `frontend/`, lancer `npm run e2e:serve` et attendre la compilation sur le port 4203. Garder ce terminal ouvert et exécuter `npm run e2e:ci` dans un deuxième terminal depuis `frontend/`. | `frontend/coverage/e2e/index.html`, JSON, LCOV et résultats JUnit. Minimum de 80 % pour chacun des quatre indicateurs. |
 | Backend JUnit/Mockito/H2 | Dans `backend/`, exécuter `mise exec java@21 maven@3.9.3 -- mvn -B clean verify` | `backend/target/site/jacoco/index.html` et `backend/target/surefire-reports/`. Par package, minimum de 90 % des lignes et de 80 % pour les instructions, branches, complexité, méthodes et classes. |
-| Backend avec MySQL | Même commande avec `YOGA_MYSQL_TEST_URL` configurée selon le README backend | Cinq intégrations supplémentaires, fixtures transactionnelles annulées, schéma existant seulement validé. |
+| Backend avec MySQL | Même commande avec `YOGA_MYSQL_TEST_URL` configurée selon le README backend | Cinq intégrations de persistance supplémentaires. Pour reproduire les 73 tests de la release, ajouter `YOGA_MYSQL_CONCURRENCY_TESTS=true` sur une base jetable initialisée. Les deux tests de concurrence valident leurs transactions puis nettoient leurs données. |
 
 Les rapports de couverture Jest et E2E sont indépendants. Les DTO backend sont
 hors du périmètre demandé et exclus de JaCoCo, le code généré Lombok est marqué
@@ -93,7 +93,7 @@ npm run e2e:serve -- --proxy-config proxy.conf.json
 CYPRESS_realApi=true npm run e2e:ci
 ```
 
-Le rapport Cypress de `v1.0.0` couvre **11 tests**, dont E-R01 dans `real-api.cy.ts`.
+Le rapport Cypress de `v1.1.0` couvre **11 tests**, dont E-R01 dans `real-api.cy.ts`.
 La commande sans `CYPRESS_realApi=true` exécute les 10 parcours avec API simulée.
 Si Spring utilise un autre port, adapter la cible du proxy en suivant le
 [README frontend](frontend/README.md#contrôle-complémentaire-avec-springmysql-réels).
