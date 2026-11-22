@@ -47,6 +47,8 @@ describe('[integration] J-I02 RegisterComponent', () => {
   it('submits registration and opens login on success', () => {
     const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const registration = { email: 'test@example.invalid', firstName: 'Test', lastName: 'Yoga', password: 'Secret!123' };
+    const passwordInput: HTMLInputElement = fixture.nativeElement.querySelector('[formControlName="password"]');
+    expect(passwordInput.type).toBe('password');
     component.form.setValue(registration);
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     const request = http.expectOne('/api/auth/register');
