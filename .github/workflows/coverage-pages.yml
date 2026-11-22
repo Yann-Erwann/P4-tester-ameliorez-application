@@ -23,17 +23,19 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/configure-pages@v5
-      - name: Prepare coverage reports from the release
+      - name: Prepare coverage reports from the releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download v0.0.2 --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
-            --pattern coverage-jest-v0.0.2.zip \
-            --pattern coverage-jacoco-v0.0.2.zip \
-            --pattern coverage-cypress-v0.0.2.zip
-          for suite in jest jacoco cypress; do
-            python3 -m zipfile -e "$RUNNER_TEMP/coverage-$suite-v0.0.2.zip" "site/v0.0.2/$suite"
-            test -s "site/v0.0.2/$suite/index.html"
+          for version in v0.0.2 v1.0.0; do
+            gh release download "$version" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
+              --pattern "coverage-jest-$version.zip" \
+              --pattern "coverage-jacoco-$version.zip" \
+              --pattern "coverage-cypress-$version.zip"
+            for suite in jest jacoco cypress; do
+              python3 -m zipfile -e "$RUNNER_TEMP/coverage-$suite-$version.zip" "site/$version/$suite"
+              test -s "site/$version/$suite/index.html"
+            done
           done
           cp .github/pages/coverage-index.html site/index.html
       - uses: actions/upload-pages-artifact@v4
