@@ -108,7 +108,15 @@ describe('[integration] J-I02 FormComponent', () => {
     const request = http.expectOne('api/session');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(values);
-    request.flush({ ...values, id: 1, users: [] });
+    request.flush(null, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('conflicts with existing data');
+    expect(component.sessionForm!.value).toEqual(values);
+    expect(navigate).not.toHaveBeenCalled();
+    component.submit();
+    fixture.detectChanges();
+    expect(element.querySelector('[role="alert"]')).toBeNull();
+    http.expectOne('api/session').flush({ ...values, id: 1, users: [] });
     expect(navigate).toHaveBeenCalledWith(['sessions']);
     expect(notify).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 });
   });
@@ -136,8 +144,21 @@ describe('[integration] J-I02 FormComponent', () => {
     expect(request.request.method).toBe('PUT');
     expect(request.request.body.name).toBe('Updated yoga');
     expect(request.request.body.users).toBeUndefined();
-    request.flush({ id: 1, ...request.request.body });
+    request.flush(null, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('conflicts with existing data');
+    expect(component.sessionForm!.value.name).toBe('Updated yoga');
+    expect(navigate).not.toHaveBeenCalled();
+    component.submit();
+    http.expectOne('api/session/1').flush({ id: 1, ...request.request.body });
     expect(navigate).toHaveBeenCalledWith(['sessions']);
+  });
+
+  it('shows a general save error when the server fails', () => {
+    component.submit();
+    http.expectOne('api/session').flush(null, { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Unable to save');
   });
 
   it('keeps teacher options attached to their IDs through refresh, reorder and removal', () => {

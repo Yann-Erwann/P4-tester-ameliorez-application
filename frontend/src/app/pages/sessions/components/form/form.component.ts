@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -28,6 +29,7 @@ export class FormComponent implements OnInit {
 
   public onUpdate: boolean = false;
   public sessionForm: FormGroup | undefined;
+  public saveError = '';
   public teachers$ = this.teacherService.all();
   private id: string | undefined;
 
@@ -51,17 +53,19 @@ export class FormComponent implements OnInit {
   public submit(): void {
     const session = this.sessionForm?.value as Session;
 
-    if (!this.onUpdate) {
-      this.sessionApiService
-        .create(session)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((_: Session) => this.exitPage('Session created !'));
-    } else {
-      this.sessionApiService
-        .update(this.id!, session)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((_: Session) => this.exitPage('Session updated !'));
-    }
+    this.saveError = '';
+    const save = this.onUpdate
+      ? this.sessionApiService.update(this.id!, session)
+      : this.sessionApiService.create(session);
+
+    save.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => this.exitPage(this.onUpdate ? 'Session updated !' : 'Session created !'),
+      error: (error: HttpErrorResponse) => {
+        this.saveError = error.status === 409
+          ? 'The session conflicts with existing data. Review your changes and try again.'
+          : 'Unable to save the session. Please try again.';
+      },
+    });
   }
 
   private initForm(session?: Session): void {
