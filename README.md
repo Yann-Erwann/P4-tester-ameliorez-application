@@ -70,10 +70,21 @@ expliquent le comptage réel des tests d’intégration. Résultats de référen
 Jest **69 tests, dont 47 intégrations (68,12 %)** backend avec MySQL **68 tests,
 dont 39 intégrations (57,35 %)**. Le minimum demandé est 30 % pour chaque suite.
 
-Cypress distingue les écrans avec API simulée par `cy.intercept` du contrôle
-complémentaire sans interception contre Spring/MySQL. Pour ce dernier, voir les
-prérequis et la commande `CYPRESS_realApi=true npm run e2e:ci` dans le README
-frontend : le serveur instrumenté doit utiliser le proxy visant le vrai backend.
+Pour inclure **E-R01** dans le rapport Cypress, démarrer Spring avec MySQL
+et vérifier qu’un compte administrateur et au moins une séance associée à un
+enseignant existent. Avec Spring sur le port 8080, lancer **depuis `frontend/`** :
+
+```bash
+# Premier terminal
+npm run e2e:serve -- --proxy-config proxy.conf.json
+
+# Deuxième terminal, après la compilation Angular
+CYPRESS_realApi=true npm run e2e:ci
+```
+
+Le résultat attendu est de **11 tests réussis**, dont un dans `real-api.cy.ts`.
+Si Spring utilise un autre port, adapter la cible du proxy en suivant le
+[README frontend](frontend/README.md#contrôle-complémentaire-avec-springmysql-réels).
 
 ## Lire les trois rapports de couverture
 

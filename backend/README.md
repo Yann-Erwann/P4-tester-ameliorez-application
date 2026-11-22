@@ -199,7 +199,7 @@ n’est inclus dans cette validation.
 
 ## Démarrage du back
 Pour démarrer le back, il :
-- démarrer Docker-Desktop sur votre poste de travail local.
+- démarrer Docker avec Compose sur la machine qui héberge le projet.
 - lancer une console, se placer dans `backend/` et exécuter la commande Maven avec `mise` :
 ```
 mise exec java@21 maven@3.9.3 -- mvn spring-boot:run
@@ -356,6 +356,28 @@ Dans l'onglet ```Exec```, il faut :
 La capture d'écran ci-dessous résume les étapes précédentes :
 
 ![2-docker-desktop-bdd](pictures/2-docker-desktop-bdd.png)
+
+### Préparer une base neuve pour le parcours Cypress E-R01
+
+E-R01 se connecte avec le compte administrateur et ouvre la première séance de
+la liste. Si cette séance affiche déjà le nom de son enseignant, le jeu de données
+est prêt. Pour une base Yoga neuve, créer le compte ci-dessus, puis vérifier les
+enseignants disponibles dans la console MySQL du schéma `test` :
+
+```sql
+SELECT id, first_name, last_name FROM teachers;
+```
+
+Si la table est vide, ajouter un enseignant de démonstration :
+
+```sql
+INSERT INTO teachers (first_name, last_name) VALUES ('Camille', 'Martin');
+```
+
+Se connecter dans Angular avec le compte administrateur. Depuis **Sessions**,
+choisir **Create**, renseigner le nom, la date et la description, sélectionner
+l’enseignant et enregistrer. Ouvrir **Detail** pour vérifier son nom avant de
+lancer la suite Cypress. E-R01 utilise ces données en lecture seule.
 
 
 ## Ressources
