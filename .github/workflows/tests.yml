@@ -1,0 +1,102 @@
+name: Test Yoga
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  jest:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run test:coverage
+
+  backend-and-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: yoga_ci
+          MYSQL_USER: yoga_ci
+          MYSQL_PASSWORD: yoga_ci_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DB_USER: yoga_ci
+      DB_PASSWORD: yoga_ci_test
+      YOGA_MYSQL_TEST_URL: jdbc:mysql://127.0.0.1:3306/yoga_ci
+      YOGA_MYSQL_CONCURRENCY_TESTS: "true"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v2
+        with:
+          install: false
+      - run: mise install java@21 maven@3.9.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Start the API and initialize the disposable database
+        working-directory: backend
+        run: |
+          mise exec java@21 maven@3.9.3 -- mvn -B -DskipTests package
+          mise exec java@21 -- java -jar target/yoga-app-*.jar \
+            --spring.docker.compose.enabled=false \
+            --spring.datasource.url="$YOGA_MYSQL_TEST_URL" \
+            --spring.jpa.hibernate.ddl-auto=update > "$RUNNER_TEMP/yoga-api.log" 2>&1 &
+          for attempt in {1..60}; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/session || true)
+            if [ "$status" = 401 ]; then exit 0; fi
+            sleep 2
+          done
+          tail -50 "$RUNNER_TEMP/yoga-api.log"
+          exit 1
+      - name: Verify Spring, H2 and MySQL
+        working-directory: backend
+        run: mise exec java@21 maven@3.9.3 -- mvn -B verify
+      - name: Prepare the browser fixtures
+        env:
+          DB_CONTAINER: ${{ job.services.mysql.id }}
+        run: |
+          {
+            cat backend/src/main/resources/sql/insert_user.sql
+            echo "INSERT INTO teachers(first_name,last_name) VALUES ('Camille','Martin');"
+            echo "INSERT INTO sessions(name,date,description,teacher_id) VALUES ('Yoga',CURRENT_DATE,'Yoga class',LAST_INSERT_ID());"
+          } | docker exec -i "$DB_CONTAINER" sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql -u "$MYSQL_USER" "$MYSQL_DATABASE"'
+      - name: Verify Cypress screens and the real API
+        working-directory: frontend
+        env:
+          CYPRESS_realApi: "true"
+        run: |
+          npm ci
+          npm run e2e:serve -- --proxy-config proxy.conf.json > "$RUNNER_TEMP/yoga-angular.log" 2>&1 &
+          for attempt in {1..90}; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4203/api/session || true)
+            if [ "$status" = 401 ]; then
+              npm run e2e:ci
+              exit $?
+            fi
+            sleep 2
+          done
+          tail -50 "$RUNNER_TEMP/yoga-angular.log"
+          exit 1
