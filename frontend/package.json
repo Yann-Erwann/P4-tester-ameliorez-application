@@ -48,6 +48,7 @@
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "baseline-browser-mapping": "^2.11.39",
     "cypress": "^15.2.0",
     "eslint": "^9.36.0",
     "istanbul-lib-coverage": "^3.2.2",
