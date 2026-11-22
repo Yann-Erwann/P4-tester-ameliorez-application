@@ -7,12 +7,14 @@ locaux existants.
 
 ## Rapports de couverture
 
-Les rapports HTML de la version `v0.0.2` sont disponibles au format ZIP.
-Extraire chaque archive, puis ouvrir son fichier `index.html`.
+Les rapports HTML de la version `v0.0.2` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
+Pour une lecture hors ligne, extraire le ZIP et ouvrir son fichier `index.html`.
 
-- [Jest — tests frontend](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jest-v0.0.2.zip)
-- [JaCoCo — tests backend](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jacoco-v0.0.2.zip)
-- [Cypress — parcours d’écran](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-cypress-v0.0.2.zip)
+| Rapport | Consultation | Téléchargement |
+| --- | --- | --- |
+| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jest-v0.0.2.zip) |
+| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-jacoco-v0.0.2.zip) |
+| Cypress — parcours d’écran | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v0.0.2/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v0.0.2/coverage-cypress-v0.0.2.zip) |
 
 ## Installer et lancer
 
