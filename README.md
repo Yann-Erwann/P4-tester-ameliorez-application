@@ -8,25 +8,25 @@ locaux existants.
 
 ## Rapports de couverture
 
-Les rapports HTML de la version `v1.1.0` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
+Les rapports HTML de la version `v1.1.1` sont consultables sur [GitHub Pages](https://yann-erwann.github.io/P4-tester-ameliorez-application/).
 Pour une lecture hors ligne, extraire le ZIP et ouvrir son fichier `index.html`.
 
 | Rapport | Consultation | Téléchargement |
 | --- | --- | --- |
-| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-jest-v1.1.0.zip) |
-| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-jacoco-v1.1.0.zip) |
-| Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.0/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.0/coverage-cypress-v1.1.0.zip) |
+| Jest — tests frontend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.1/jest/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.1/coverage-jest-v1.1.1.zip) |
+| JaCoCo — tests backend | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.1/jacoco/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.1/coverage-jacoco-v1.1.1.zip) |
+| Cypress — 10 parcours simulés et E-R01 sur API réelle | [Voir le rapport](https://yann-erwann.github.io/P4-tester-ameliorez-application/v1.1.1/cypress/) | [Télécharger le ZIP](https://github.com/Yann-Erwann/P4-tester-ameliorez-application/releases/download/v1.1.1/coverage-cypress-v1.1.1.zip) |
 
-### Nombre de tests réussis dans `v1.1.0`
+### Nombre de tests réussis dans `v1.1.1`
 
 | Suite | Tests unitaires | Tests d’intégration | Tests de bout en bout (E2E) | Autres contrôles | Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Jest · frontend | 22 | 49 | 0 | 0 | 71 |
+| Jest · frontend | 22 | 53 | 0 | 0 | 75 |
 | JUnit · backend | 27 | 44 | 0 | 2 | 73 |
 | Cypress · navigateur | 0 | 0 | 11 | 0 | 11 |
-| **Total** | **49** | **93** | **11** | **2** | **155** |
+| **Total** | **49** | **97** | **11** | **2** | **159** |
 
-- **Jest** combine les composants et services Angular dans 49 tests d’intégration (69,01 %). Les appels HTTP y reçoivent des réponses simulées. Les 22 tests unitaires incluent le test de l’utilitaire de configuration de `TestBed`.
+- **Jest** combine les composants et services Angular dans 53 tests d’intégration (70,67 %). Les appels HTTP y reçoivent des réponses simulées. Les 22 tests unitaires incluent le test de l’utilitaire de configuration de `TestBed`.
 - **JUnit** exécute 37 tests avec un contexte Spring et une base H2 en mémoire, et 7 avec MySQL, soit 44 intégrations (60,27 %). Les deux autres contrôles portent sur l’architecture avec ArchUnit et sur le gestionnaire d’exceptions avec un contrôleur de test et MockMvc.
 - **Cypress** exécute 10 parcours d’écran avec des réponses API simulées. Le onzième, **E-R01**, relie le navigateur Angular au serveur Spring et à MySQL pour tester la connexion, la consultation d’une séance et du compte, puis la déconnexion.
 
@@ -98,7 +98,7 @@ npm run e2e:serve -- --proxy-config proxy.conf.json
 CYPRESS_realApi=true npm run e2e:ci
 ```
 
-Le rapport Cypress de `v1.1.0` couvre **11 tests**, dont E-R01 dans `real-api.cy.ts`.
+Le rapport Cypress de `v1.1.1` couvre **11 tests**, dont E-R01 dans `real-api.cy.ts`.
 La commande sans `CYPRESS_realApi=true` exécute les 10 parcours avec API simulée.
 Si Spring utilise un autre port, adapter la cible du proxy en suivant le
 [README frontend](frontend/README.md#contrôle-complémentaire-avec-springmysql-réels).
