@@ -86,6 +86,10 @@ describe('[integration] J-I02 LoginComponent', () => {
         http.expectNone('/api/auth/login');
       }
     }
+    fixture.nativeElement.querySelector('button[mat-icon-button]').click();
+    fixture.detectChanges();
+    expect(input.type).toBe('text');
+    http.expectNone('/api/auth/login');
   });
 
   it('should show an error when login is refused', () => {
