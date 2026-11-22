@@ -1,6 +1,7 @@
 package com.openclassrooms.starterjwt.controllers;
 
 import com.openclassrooms.starterjwt.dto.SessionDto;
+import com.openclassrooms.starterjwt.dto.SessionSummary;
 import com.openclassrooms.starterjwt.mapper.SessionMapper;
 import com.openclassrooms.starterjwt.models.Session;
 import com.openclassrooms.starterjwt.services.SessionService;
@@ -36,6 +37,11 @@ public class SessionController {
         Session session = this.sessionService.getById(Long.valueOf(id));
 
         return ResponseEntity.ok().body(this.sessionMapper.toDto(session));
+    }
+
+    @GetMapping(params = "view=summary")
+    public List<SessionSummary> findSummaries() {
+        return sessionService.findSummaries();
     }
 
     @GetMapping()

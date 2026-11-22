@@ -50,6 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.show-sql=false",
+        "spring.jpa.properties.hibernate.generate_statistics=true",
+        "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=OFF",
         "oc.app.jwtSecret=QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ=="
 })
 @AutoConfigureMockMvc
@@ -212,6 +214,37 @@ class ApiContractsTest {
         assertThat(sessionMapper.toDto(List.<Session>of())).isEmpty();
         assertThat(teacherMapper.toEntity(List.of())).isEmpty();
         assertThat(userMapper.toEntity(List.of())).isEmpty();
+    }
+
+    @Test
+    void sessionSummaryReturnsCardFieldsAndKeepsTheOriginalListContract() throws Exception {
+        perform(authenticated(get("/api/session").param("view", "summary"), owner))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(session.getId()))
+                .andExpect(jsonPath("$[0].name").value(session.getName()))
+                .andExpect(jsonPath("$[0].date").isNotEmpty())
+                .andExpect(jsonPath("$[0].description").value(session.getDescription()))
+                .andExpect(jsonPath("$[0].teacher_id").doesNotExist())
+                .andExpect(jsonPath("$[0].users").doesNotExist());
+        perform(authenticated(get("/api/session"), owner)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].teacher_id").value(teacher.getId()))
+                .andExpect(jsonPath("$[0].users").isArray());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 25})
+    void summaryReadsAnyNumberOfCardsInOneStatement(int total) {
+        for (int n = 1; n < total; n++) {
+            sessions.save(requireNonNull(Session.builder().name("Yoga " + n).date(session.getDate())
+                    .description("Evening session").build()));
+        }
+        sessions.flush();
+        entityManager.clear();
+        var statistics = entityManager.getEntityManagerFactory()
+                .unwrap(org.hibernate.SessionFactory.class).getStatistics();
+        long before = statistics.getPrepareStatementCount();
+        assertThat(sessions.findSummaries()).hasSize(total);
+        assertThat(statistics.getPrepareStatementCount() - before).isEqualTo(1);
     }
 
     @Test

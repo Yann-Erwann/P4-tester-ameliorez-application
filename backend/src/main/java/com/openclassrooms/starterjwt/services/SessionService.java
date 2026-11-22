@@ -1,5 +1,6 @@
 package com.openclassrooms.starterjwt.services;
 
+import com.openclassrooms.starterjwt.dto.SessionSummary;
 import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.exception.NotFoundException;
 import com.openclassrooms.starterjwt.models.Session;
@@ -39,6 +40,11 @@ public class SessionService {
 
     public List<Session> findAll() {
         return this.sessionRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SessionSummary> findSummaries() {
+        return sessionRepository.findSummaries();
     }
 
     @NonNull

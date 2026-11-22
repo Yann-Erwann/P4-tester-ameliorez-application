@@ -109,6 +109,15 @@ La grille d’évaluation fournie couvre tests unitaires/intégration, proportio
 rapports multi-indicateurs et procédures README. La matrice ci-dessus relie
 ces critères aux classes réellement exécutées.
 
+## Lecture des séances
+
+Un utilisateur authentifié peut appeler `GET /api/session?view=summary` pour
+obtenir une liste ordonnée par identifiant. Chaque ligne contient `id`, `name`,
+`date` et `description`. Cette projection exécute une seule requête SQL pour les
+cartes. `GET /api/session` conserve le tableau complet de v1.0.0, y compris les
+participants et l’enseignant. Les deux lectures utilisent ensuite le même contrat
+de détail `GET /api/session/{id}`.
+
 ## Responsabilités et erreurs HTTP
 
 Les contrôleurs délèguent les opérations métier aux services. `AuthService`
