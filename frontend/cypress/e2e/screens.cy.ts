@@ -131,6 +131,9 @@ describe('E-S01 screen journeys with controlled API responses', () => {
 
   it('E-10 deletes the current member account then returns to login', () => {
     login(); cy.contains('Account').click(); cy.wait('@account'); cy.contains('Delete my account:').should('be.visible');
-    cy.get('button[color=warn]').click(); cy.wait('@deleteAccount'); cy.location('pathname').should('eq', '/login');
+    cy.get('button[color=warn]').click(); cy.wait('@deleteAccount').then(({ request }) => {
+      expect(new URL(request.url).pathname).to.equal(`/api/user/${member.id}`);
+    });
+    cy.location('pathname').should('eq', '/login');
   });
 });
