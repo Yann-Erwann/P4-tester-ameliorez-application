@@ -6,7 +6,10 @@ on:
     paths:
       - .github/workflows/coverage-pages.yml
       - .github/pages/coverage-index.html
+      - .github/pages/coverage-releases.sha256
   workflow_dispatch:
+
+permissions: {}
 
 concurrency:
   group: coverage-pages
@@ -14,36 +17,50 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       contents: read
-      pages: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
-      - uses: actions/configure-pages@v5
-      - name: Prepare coverage reports from the releases
+      - name: Download the listed release assets
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          for version in v0.0.2 v1.0.0 v1.1.0; do
-            gh release download "$version" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
-              --pattern "coverage-jest-$version.zip" \
-              --pattern "coverage-jacoco-$version.zip" \
-              --pattern "coverage-cypress-$version.zip"
-            for suite in jest jacoco cypress; do
-              python3 -m zipfile -e "$RUNNER_TEMP/coverage-$suite-$version.zip" "site/$version/$suite"
-              test -s "site/$version/$suite/index.html"
-            done
-          done
-          cp .github/pages/coverage-index.html site/index.html
-      - uses: actions/upload-pages-artifact@v4
+          mkdir "$RUNNER_TEMP/coverage-downloads"
+          cd "$RUNNER_TEMP/coverage-downloads"
+          while read -r _ archive; do
+            version=${archive%/*}
+            suite=${archive#*/}
+            mkdir -p "$version"
+            gh release download "$version" --repo "$GITHUB_REPOSITORY" \
+              --pattern "coverage-${suite%.zip}-$version.zip" --output "$archive"
+          done < "$GITHUB_WORKSPACE/.github/pages/coverage-releases.sha256"
+      - name: Verify all checksums before extracting reports
+        shell: bash
+        working-directory: ${{ runner.temp }}/coverage-downloads
+        run: |
+          manifest="$GITHUB_WORKSPACE/.github/pages/coverage-releases.sha256"
+          sha256sum --check --strict "$manifest"
+          site="$RUNNER_TEMP/coverage-site"
+          mkdir "$site"
+          while read -r _ archive; do
+            report="$site/${archive%.zip}"
+            python3 -m zipfile -e "$archive" "$report"
+            test -s "$report/index.html"
+          done < "$manifest"
+          cp "$GITHUB_WORKSPACE/.github/pages/coverage-index.html" "$site/index.html"
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
-          path: site
+          path: ${{ runner.temp }}/coverage-site
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     needs: build
     permissions:
       pages: write
@@ -52,5 +69,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
         id: deployment
