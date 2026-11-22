@@ -45,9 +45,9 @@ depuis `backend/`, avec les identifiants du fichier `.env` existant :
 YOGA_MYSQL_TEST_URL=jdbc:mysql://127.0.0.1:32768/test mise exec java@21 maven@3.9.3 -- mvn -B clean verify
 ```
 
-Remplacer l’URL par celle de la base Yoga visée. `MySqlPersistenceTest` utilise
-uniquement `ddl-auto=validate` et ses propres fixtures transactionnelles annulées
-en fin de test, aucune table ni volume n’est recréé. Les compteurs automatiques
+Remplacer l’URL par celle de la base Yoga visée. Avec cette seule variable, les cinq tests
+de persistance utilisent `ddl-auto=validate` et annulent leurs transactions en
+fin de test. Les compteurs automatiques
 peuvent avancer malgré le rollback. Sans cette variable, ces tests MySQL sont
 explicitement ignorés, tandis que les tests H2 restent exécutés. Ces tests
 vérifient suppression d’un compte inscrit, maintien des participants à l’édition,
@@ -60,8 +60,9 @@ complémentaires.
 La commande complète `mise exec java@21 maven@3.9.3 -- mvn -B clean verify`
 exécute JUnit 5 / Mockito et les intégrations Spring Boot Test avec H2. Pour
 inclure MySQL, utiliser la variable `YOGA_MYSQL_TEST_URL` présentée ci-dessus.
-Les tests MySQL utilisent la base existante en `validate` et annulent leurs
-fixtures, les tests H2 créent uniquement une base en mémoire isolée.
+Les tests H2 créent une base en mémoire isolée. Les cinq tests de persistance MySQL
+annulent leurs transactions. Les deux tests de concurrence utilisent des transactions
+validées et nettoient leurs données sur une base jetable.
 
 | Périmètre | Tests et scénarios |
 | --- | --- |
@@ -95,15 +96,18 @@ mise exec java@21 maven@3.9.3 -- mvn -B -Dgroups=integration test
 Cette sélection ne remplace pas `verify`, qui mesure la suite complète.
 La proportion d’intégration se calcule sur les cas exécutés, en excluant les
 cas ignorés : somme des attributs `tests - skipped` des deux suites annotées,
-divisée par la même somme de toutes les suites XML. La dernière exécution H2
-compte 34 intégrations sur 63 tests exécutés (53,97 %). MySQL ajoute cinq cas
-d’intégration quand sa variable est renseignée. Les fichiers XML permettent de
-recalculer ce ratio après chaque évolution, le minimum demandé est 30 %.
-La vérification complète avec MySQL a passé **68 tests, dont 39 intégrations
-(57,35 %)**, sans échec ni test ignoré. Pour `v1.0.0`, JaCoCo mesure
-98,61 % des instructions, 95,24 % des branches, 98,35 % des lignes, 96,08 % de la complexité,
-98,20 % des méthodes et 100 % des classes. Les seuils sont contrôlés par package,
-les rapports XML/HTML précisent les dénominateurs et le périmètre exclu.
+divisée par la même somme de toutes les suites XML. Le minimum demandé est 30 %.
+
+| Configuration de `v1.1.0` | Tests exécutés | Intégrations |
+| --- | ---: | ---: |
+| Sans MySQL | 66 | 37 sur H2 |
+| Avec `YOGA_MYSQL_TEST_URL` | 71 | 37 sur H2 et 5 sur MySQL |
+| Avec l’URL MySQL et `YOGA_MYSQL_CONCURRENCY_TESTS=true` sur une base jetable | 73 | 37 sur H2 et 7 sur MySQL |
+
+La suite complète compte **44 intégrations sur 73 tests (60,27 %)**.
+Les 29 autres cas comprennent 27 tests unitaires, le contrôle ArchUnit et le
+test du gestionnaire d’exceptions avec MockMvc. Les résultats de couverture
+par package et pour l’ensemble du backend figurent dans le rapport JaCoCo.
 
 La grille d’évaluation fournie couvre tests unitaires/intégration, proportion,
 rapports multi-indicateurs et procédures README. La matrice ci-dessus relie
