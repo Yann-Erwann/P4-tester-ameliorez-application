@@ -27,7 +27,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for version in v0.0.2 v1.0.0; do
+          for version in v0.0.2 v1.0.0 v1.1.0; do
             gh release download "$version" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
               --pattern "coverage-jest-$version.zip" \
               --pattern "coverage-jacoco-$version.zip" \
