@@ -39,13 +39,13 @@ class SessionServiceTest {
     @SuppressWarnings("null") // Mockito supplies a dummy null when registering the matcher.
     @ParameterizedTest @ValueSource(booleans = {false, true})
     void participationRequiresBothAnAccountAndASession(boolean missingAccount) {
-        if (missingAccount) when(sessions.findById(1L)).thenReturn(Optional.of(session));
+        if (missingAccount) when(sessions.findForParticipation(1L)).thenReturn(Optional.of(session));
         else when(users.findById(7L)).thenReturn(Optional.of(member));
         assertThatThrownBy(() -> service.participate(1L, 7L)).isInstanceOf(NotFoundException.class);
         verify(sessions, never()).save(any());
     }
     @Test void addsOneMemberAndRejectsDuplicateParticipation() {
-        when(sessions.findById(1L)).thenReturn(Optional.of(session));
+        when(sessions.findForParticipation(1L)).thenReturn(Optional.of(session));
         when(users.findById(7L)).thenReturn(Optional.of(member));
         service.participate(1L, 7L);
         assertThat(session.getUsers()).containsExactly(member);
@@ -55,7 +55,7 @@ class SessionServiceTest {
     @Test void removingAMemberPreservesOtherMembers() {
         User other = new User("other@example.invalid", "Last", "Other", "encoded", false).setId(8L);
         session.getUsers().addAll(List.of(member, other));
-        when(sessions.findById(1L)).thenReturn(Optional.of(session));
+        when(sessions.findForParticipation(1L)).thenReturn(Optional.of(session));
         service.noLongerParticipate(1L, 7L);
         assertThat(session.getUsers()).containsExactly(other);
         assertThatThrownBy(() -> service.noLongerParticipate(1L, 7L)).isInstanceOf(BadRequestException.class);

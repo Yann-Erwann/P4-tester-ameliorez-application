@@ -68,7 +68,7 @@ public class SessionService {
     @Transactional
     @PreAuthorize("isAuthenticated() and #p1 == principal.id")
     public void participate(Long id, Long userId) {
-        Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
+        Session session = this.sessionRepository.findForParticipation(id).orElse(null);
         User user = this.userRepository.findById(Objects.requireNonNull(userId)).orElse(null);
         if (session == null || user == null) {
             throw new NotFoundException();
@@ -87,7 +87,7 @@ public class SessionService {
     @Transactional
     @PreAuthorize("isAuthenticated() and #p1 == principal.id")
     public void noLongerParticipate(Long id, Long userId) {
-        Session session = this.sessionRepository.findById(Objects.requireNonNull(id)).orElse(null);
+        Session session = this.sessionRepository.findForParticipation(id).orElse(null);
         if (session == null) {
             throw new NotFoundException();
         }

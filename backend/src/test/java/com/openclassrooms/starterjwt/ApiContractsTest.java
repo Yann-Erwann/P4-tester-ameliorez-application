@@ -361,9 +361,13 @@ class ApiContractsTest {
     void participationAndRemovalKeepEmptySuccessResponsesAndPersistMembership() throws Exception {
         String path = "/api/session/" + session.getId() + "/participate/" + owner.getId();
         perform(authenticated(post(path), owner)).andExpect(status().isOk()).andExpect(content().string(""));
+        sessions.flush();
+        entityManager.clear();
         assertThat(sessions.findById(requireNonNull(session.getId())).orElseThrow().getUsers()).extracting(user -> user.getId()).containsExactly(owner.getId());
         perform(authenticated(post(path), owner)).andExpect(status().isBadRequest());
         perform(authenticated(delete(path), owner)).andExpect(status().isOk()).andExpect(content().string(""));
+        sessions.flush();
+        entityManager.clear();
         assertThat(sessions.findById(requireNonNull(session.getId())).orElseThrow().getUsers()).isEmpty();
         perform(authenticated(delete(path), owner)).andExpect(status().isBadRequest());
     }

@@ -118,6 +118,16 @@ cartes. `GET /api/session` conserve le tableau complet de v1.0.0, y compris les
 participants et l’enseignant. Les deux lectures utilisent ensuite le même contrat
 de détail `GET /api/session/{id}`.
 
+### Inscriptions concurrentes
+
+Le service verrouille la séance en écriture pendant les opérations de
+participation et de retrait. Les tests de concurrence utilisent deux connexions
+MySQL et des données visibles entre transactions. Ils vérifient deux inscriptions
+distinctes et deux inscriptions du même membre, puis suppriment leurs fixtures.
+Pour les inclure dans `mvn verify`, définir `YOGA_MYSQL_CONCURRENCY_TESTS=true`
+avec une `YOGA_MYSQL_TEST_URL` pointant vers une base de test jetable initialisée.
+Le workflow de pull request prépare cette base.
+
 ## Responsabilités et erreurs HTTP
 
 Les contrôleurs délèguent les opérations métier aux services. `AuthService`
