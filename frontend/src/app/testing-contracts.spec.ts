@@ -43,12 +43,11 @@ describe('[unit] J-U01 session state and route decisions', () => {
     else expect(navigate).toHaveBeenCalledWith(['login']);
   });
 
-  it.each([false, true])('protects guest routes with the existing redirect (connected: %s)', connected => {
-    const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+  it.each([false, true])('allows guests and redirects signed-in users to sessions (connected: %s)', connected => {
+    const router = TestBed.inject(Router);
     if (connected) TestBed.inject(SessionService).logIn(identity);
-    expect(TestBed.inject(UnauthGuard).canActivate()).toBe(!connected);
-    if (connected) expect(navigate).toHaveBeenCalledWith(['rentals']);
-    else expect(navigate).not.toHaveBeenCalled();
+    const decision = TestBed.inject(UnauthGuard).canActivate();
+    expect(typeof decision === 'boolean' ? decision : router.serializeUrl(decision)).toBe(connected ? '/sessions' : true);
   });
 });
 
