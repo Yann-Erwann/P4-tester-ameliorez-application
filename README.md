@@ -1,6 +1,7 @@
 # Yoga — application et tests
 
-Application de studio de yoga : frontend Angular 19 et backend Spring Boot 3.5.5.
+Le frontend du studio de yoga utilise Angular 19.2.15, Angular CLI 19.2.17 et TypeScript 5.8.3.
+Le backend repose sur Spring Boot 3.5.5.
 Le backend utilise Java 21, Maven 3.9.3 et MySQL. Les outils Java sont sélectionnés
 avec `mise`, le frontend utilise Node 20 et npm. Conserver les données et volumes
 locaux existants.
