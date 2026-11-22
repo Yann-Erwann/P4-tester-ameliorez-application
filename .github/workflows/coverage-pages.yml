@@ -1,0 +1,54 @@
+name: Publish coverage reports
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/coverage-pages.yml
+      - .github/pages/coverage-index.html
+  workflow_dispatch:
+
+concurrency:
+  group: coverage-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - name: Prepare coverage reports from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.0.2 --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
+            --pattern coverage-jest-v0.0.2.zip \
+            --pattern coverage-jacoco-v0.0.2.zip \
+            --pattern coverage-cypress-v0.0.2.zip
+          for suite in jest jacoco cypress; do
+            python3 -m zipfile -e "$RUNNER_TEMP/coverage-$suite-v0.0.2.zip" "site/v0.0.2/$suite"
+            test -s "site/v0.0.2/$suite/index.html"
+          done
+          cp .github/pages/coverage-index.html site/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
